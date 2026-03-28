@@ -18,10 +18,9 @@ return new class extends Migration {
             $table->string('phone');
             $table->string('email')->unique();
             $table->string('password_hash');
-            $table->integer('loyalty_points');
-            $table->dateTime('created_at');
-            $table->dateTime('updated_at');
-            $table->boolean('subscribe_events');
+            $table->integer('loyalty_points')->default(0);
+            $table->timestamps();
+            $table->boolean('subscribe_events')->default(false);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {
