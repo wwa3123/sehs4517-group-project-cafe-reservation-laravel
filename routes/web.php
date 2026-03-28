@@ -12,9 +12,7 @@ Route::get('/tailwind', function () {
     return view('tailwindTest');
 });
 
-Route::get('/register', function() {
-    return view('register');
-});
+Route::get('/register', [RegistrationController::class, 'show']);
 Route::post('/register', [RegistrationController::class, 'register']);
 Route::get('/check-email', [RegistrationController::class, 'checkEmail']);
 Route::post('/forget-old', function() {
