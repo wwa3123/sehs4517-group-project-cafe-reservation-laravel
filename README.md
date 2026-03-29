@@ -97,12 +97,12 @@ DB_PASSWORD=your_pass
 ```
 php artisan migrate
 ```
-### 8. Start the Laravel development server
+### 8. Start everything
 ```
-php artisan serve
+composer run dev
 ```
-### 9. Start the frontend build tool (Vite)
-```
-npm run dev
-```
+### ~~8. Start the Laravel development server~~
+
+### ~~9. Start the frontend build tool (Vite)~~
+
 
