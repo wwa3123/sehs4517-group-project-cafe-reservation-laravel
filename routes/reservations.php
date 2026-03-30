@@ -16,18 +16,14 @@ use App\Http\Controllers\ReservationController;
 
 // Admin route to get all reservations
 
-Route::prefix('reserve')->name('reserve.')->group(function () {
-    Route::get('/all', [ReservationController::class, 'getAllReservation'])->name('all');
-    
-    // Shows the form to create a reservation
+Route::prefix('reservations')->name('reservations.')->group(function () {
+
+    Route::get('/', [ReservationController::class, 'index'])->name('index');
+
     Route::get('/create', [ReservationController::class, 'create'])->name('create');
 
-    // Stores the new reservation
     Route::post('/', [ReservationController::class, 'store'])->name('store');
 
-    // Shows a specific reservation confirmation
     Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
 
-    // Shows a list of the user's reservations
-    Route::get('/', [ReservationController::class, 'index'])->name('index');
     });

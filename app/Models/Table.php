@@ -9,18 +9,8 @@ class Table extends Model
 {
     use HasFactory;
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
     protected $primaryKey = 'table_id';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'type',
@@ -31,11 +21,8 @@ class Table extends Model
         'min_time',
     ];
 
-    /**
-     * Get the reserved slots for the table.
-     */
     public function reservedSlots()
     {
-        return $this->hasMany(ReservedSlot::class, 'table_id', 'table_id');
+        return $this->hasMany(ReservedSlot::class, 'table_id');
     }
 }
