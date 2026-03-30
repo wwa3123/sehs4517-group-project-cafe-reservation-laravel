@@ -20,7 +20,7 @@ class RegistrationController extends Controller {
 
     public function register(RegistrationRequest $request) {
 
-        $user = Member::registerUser($request->validated());
+        $user = Member::registerMember($request->validated());
 
         Auth::login($user);
 
