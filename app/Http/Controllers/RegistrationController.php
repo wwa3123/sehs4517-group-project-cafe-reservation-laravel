@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
+use App\Models\Member;
 use Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class RegistrationController extends Controller {
 
     public function register(RegistrationRequest $request) {
 
-        $user = User::registerUser($request->validated());
+        $user = Member::registerUser($request->validated());
 
         Auth::login($user);
 
@@ -29,7 +29,7 @@ class RegistrationController extends Controller {
     }
 
     public function checkEmail(Request $request) {
-        $exists = DB::table('users')->where('email', $request->input('email'))->exists();
+        $exists = DB::table('members')->where('email', $request->input('email'))->exists();
         return response()->json(['exists' => $exists]);
     }
 }
