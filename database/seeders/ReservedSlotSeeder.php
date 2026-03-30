@@ -17,21 +17,21 @@ class ReservedSlotSeeder extends Seeder
     {
         ReservedSlot::create([
             'time_slots_id' => 1,
-            'source_id' => 1,
+            'reservation_id' => 1,
             'source_type' => 'RESERVATION',
             'table_id' => 1,
         ]);
 
         ReservedSlot::create([
             'time_slots_id' => 2,
-            'source_id' => 2,
+            'reservation_id' => 2,
             'source_type' => 'RESERVATION',
             'table_id' => 2,
         ]);
 
         ReservedSlot::create([
             'time_slots_id' => 3,
-            'source_id' => 1,
+            'reservation_id' => 1,
             'source_type' => 'EVENT',
             'table_id' => 1,
         ]);
