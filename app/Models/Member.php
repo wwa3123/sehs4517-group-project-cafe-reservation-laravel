@@ -29,6 +29,7 @@ class Member extends Authenticatable
         'phone',
         'email',
         'password_hash',
+        'role',
         'subscribe_events',
         'loyalty_points',
     ];

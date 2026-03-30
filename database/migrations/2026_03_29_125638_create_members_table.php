@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->unique();
             $table->string('password_hash');
+            $table->string('role')->default('member');
             $table->boolean('subscribe_events')->default(false);
             $table->integer('loyalty_points')->default(0);
             $table->timestamps();
