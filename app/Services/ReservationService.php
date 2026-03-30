@@ -11,18 +11,22 @@ class ReservationService
     public function createReservation(array $data)
     {
         return DB::transaction(function () use ($data) {
+            // Step 1: Create the main reservation record (this is unchanged)
             $reservation = Reservation::create([
                 'member_id' => $data['member_id'],
                 'date' => $data['date'],
                 'num_guests' => $data['num_guests'],
             ]);
 
-            ReservedSlot::create([
-                'reservation_id' => $reservation->reservation_id,
-                'table_id' => $data['table_id'],
-                'time_slots_id' => $data['time_slots_id'],
-                'source_type' => 'RESERVATION',
-            ]);
+            // Step 2: Loop through the time slots and create a ReservedSlot for each
+            foreach ($data['time_slots_id'] as $timeSlotId) {
+                ReservedSlot::create([
+                    'reservation_id' => $reservation->reservation_id,
+                    'table_id' => $data['table_id'],
+                    'time_slots_id' => $timeSlotId, // Use the ID from the loop
+                    'source_type' => 'RESERVATION',
+                ]);
+            }
 
             return $reservation;
         });

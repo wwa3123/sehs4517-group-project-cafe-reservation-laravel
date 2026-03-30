@@ -43,13 +43,17 @@
             </select>
         </div>
         <div>
-            <label for="time_slots_id">Time Slot:</label>
-            <select name="time_slots_id" id="time_slots_id" required>
+            <label for="time_slots_id">Time Slot(s):</label>
+            <small>(Hold Ctrl or Cmd to select multiple)</small>
+            <select name="time_slots_id[]" id="time_slots_id" required multiple size="5">
                 @foreach($timeSlots as $timeSlot)
-                    <option value="{{ $timeSlot->time_slots_id }}">{{ $timeSlot->start_time }} - {{ $timeSlot->end_time }}</option>
+                    <option value="{{ $timeSlot->time_slots_id }}">{{ \Carbon\Carbon::parse($timeSlot->start_time)->format('h:i A') }} - {{ \Carbon\Carbon::parse($timeSlot->end_time)->format('h:i A') }}</option>
                 @endforeach
             </select>
         </div>
+         <div>
+            <label for="notes">Additional Notes:</label>
+            <textarea name="notes" id="notes" rows="4"></textarea>
         <button type="submit">Create Reservation</button>
     </form>
 </body>

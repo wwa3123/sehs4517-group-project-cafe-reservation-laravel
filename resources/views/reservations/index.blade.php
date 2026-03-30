@@ -38,7 +38,7 @@
                     </td>
                     <td>
                         @foreach($reservation->reservedSlots as $slot)
-                            {{ $slot->timeSlot->start_time }} - {{ $slot->timeSlot->end_time }}
+                            <div>{{ \Carbon\Carbon::parse($slot->timeSlot->start_time)->format('h:i A') }}</div>
                         @endforeach
                     </td>
                     <td>

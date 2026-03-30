@@ -12,10 +12,20 @@
     <p><strong>Number of Guests:</strong> {{ $reservation->num_guests }}</p>
 
     <h2>Reserved Slot Details</h2>
-    @foreach($reservation->reservedSlots as $slot)
-        <p><strong>Table:</strong> {{ $slot->table->name }}</p>
-        <p><strong>Time Slot:</strong> {{ $slot->timeSlot->start_time }} to {{ $slot->timeSlot->end_time }}</p>
-    @endforeach
+    <p><strong>Table:</strong> {{ $reservation->reservedSlots->first()->table->name ?? 'N/A' }}</p>
+
+    <ul>
+        @forelse($reservation->reservedSlots as $slot)
+            <li>
+                <strong>Time Slot:</strong>
+                {{ \Carbon\Carbon::parse($slot->timeSlot->start_time)->format('h:i A') }}
+                to
+                {{ \Carbon\Carbon::parse($slot->timeSlot->end_time)->format('h:i A') }}
+            </li>
+        @empty
+            <li>No time slots were reserved.</li>
+        @endforelse
+    </ul>
 
     <a href="{{ route('reservations.index') }}">Back to Reservations List</a>
 </body>
