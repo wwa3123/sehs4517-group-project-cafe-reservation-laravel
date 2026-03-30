@@ -30,7 +30,7 @@ class ReservedSlot extends Model
      */
     protected $fillable = [
         'time_slots_id',
-        'source_id',
+        'reservation_id',
         'source_type',
         'table_id',
     ];
@@ -44,18 +44,18 @@ class ReservedSlot extends Model
     }
 
     /**
+     * Get the reservation for the reserved slot.
+     */
+    public function reservation()
+    {
+        return $this->belongsTo(Reservation::class, 'reservation_id', 'reservation_id');
+    }
+
+    /**
      * Get the table for the reserved slot.
      */
     public function table()
     {
         return $this->belongsTo(Table::class, 'table_id', 'table_id');
-    }
-
-    /**
-     * Get the parent source model (reservation or event).
-     */
-    public function source()
-    {
-        return $this->morphTo();
     }
 }
