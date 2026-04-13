@@ -71,4 +71,8 @@ class Member extends Authenticatable
             'subscribe_events' => request()->boolean('subscribe'),
         ]);
     }
+
+    public function getAuthPassword() {
+        return $this->password_hash;
+    }
 }
