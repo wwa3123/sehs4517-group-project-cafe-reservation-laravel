@@ -324,6 +324,12 @@
         <form class="login-form" id="loginForm" method="POST" action="{{ route('login.verify') }}">
             @csrf
             
+            @if($errors->any())
+            <div style="background:#fee9e6; color:#e74c3c; padding:14px 18px; border-radius:20px; text-align:center; font-weight:600;">
+                {{ $errors->first() }}
+            </div>
+            @endif
+
             <!-- Email -->
             <div class="input-group">
                 <label for="email">Email</label>

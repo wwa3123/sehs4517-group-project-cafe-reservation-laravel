@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Member;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 
@@ -15,28 +15,28 @@ class LoginController extends Controller
         return view('login'); 
     }
 
-    // login verification
     public function verify(Request $request)
     {
-        $email = $request->email;
-        $password = $request->password;
+        $credentials = $request->validate([
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
 
-        $member = DB::table('members')->where('email', $email)->first();
+        $member = Member::where('email', $request->email)->first();
 
-        if ($member && Hash::check($password, $member->password_hash)) {
-            Session::put('member_id', $member->member_id);
-            Session::put('member_name', $member->first_name . ' ' . $member->last_name);
-            
-            return redirect()->route('reserve');// 假定預約頁面路由名稱為reserve
+        if ($member && Hash::check($request->password, $member->password_hash)) {
+            $request->session()->regenerate();
+            Session::put('member', [
+                'id' => $member->member_id,
+                'first_name' => $member->first_name,
+                'last_name' => $member->last_name,
+            ]);
+            return redirect()->route('reserve');
         } else {
-            return redirect()->route('login.failed');
+            return back()->withErrors([
+                'email' => 'Invalid email or password.'
+            ])->withInput($request->only('email'));
         }
-    }
-
-    // login failed page
-    public function failed()
-    {
-        return view('login_failed');  
     }
 
     // logout function

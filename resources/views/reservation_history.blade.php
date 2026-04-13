@@ -183,6 +183,11 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <div class="pagination-wrapper" style="margin-top: 20px; text-align: center;">
+                    {{ $history->links() }}
+                </div>
+
             @else
                 <div class="empty-message">
                     No reservations yet. <a href="/reserve" style="color:#4c9f2f;">Make your first reservation</a>
