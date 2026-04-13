@@ -1,6 +1,6 @@
 let timer;
 
-document.getElementById('email').addEventListener('input', function (e) {
+document.getElementById('email')?.addEventListener('input', function (e) {
     const email = e.target.value;
     const msg = document.getElementById('email-msg');
     const re = /\S+@\S+\.\S+/;
@@ -27,7 +27,7 @@ document.getElementById('email').addEventListener('input', function (e) {
     }, 500);
 });
 
-document.getElementById('setpassword').addEventListener('input', (e) => {
+document.getElementById('setpassword')?.addEventListener('input', (e) => {
     const bar = document.getElementById('strength-fill');
     const barcontainer = document.getElementById('strength-bar');
     const password = e.target.value;
@@ -57,7 +57,7 @@ document.getElementById('setpassword').addEventListener('input', (e) => {
 
 
 // reset elements with saved inputs not removable by normal form reset, get rid of error messages, clear strength bar
-document.getElementById('reset').addEventListener('click', () => {
+document.getElementById('reset')?.addEventListener('click', () => {
     const bar = document.getElementById('strength-fill');
     const barcontainer = document.getElementById('strength-bar');
     const form = document.getElementById('reg');
