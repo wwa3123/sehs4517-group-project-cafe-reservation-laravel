@@ -25,7 +25,7 @@ class RegistrationController extends Controller {
         Auth::login($user);
 
         $request->session()->forget('_old_input');
-        return redirect('/profile')->with('registered', 'Successfully Registered!');
+        return redirect('/profile')->with('success', 'Successfully Registered!');
     }
 
     public function checkEmail(Request $request) {
