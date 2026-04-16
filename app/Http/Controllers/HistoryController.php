@@ -9,7 +9,7 @@ class HistoryController extends Controller
 {
     public function index()
     {
-        $memberId = Session::get('member.id');
+        $memberId = Auth::id();
 
         $history = Reservation::where('member_id', $memberId)
             ->latest()
