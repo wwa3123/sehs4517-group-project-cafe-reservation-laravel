@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class Member extends Authenticatable
 {
@@ -57,5 +58,21 @@ class Member extends Authenticatable
     public function eventRegistrations()
     {
         return $this->hasMany(EventRegistration::class, 'member_id', 'member_id');
+    }
+
+    public static function registerMember($data) {
+        return self::create([
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'address' => $data['address'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+            'password_hash' => Hash::make($data['password']),
+            'subscribe_events' => request()->boolean('subscribe'),
+        ]);
+    }
+
+    public function getAuthPassword() {
+        return $this->password_hash;
     }
 }
