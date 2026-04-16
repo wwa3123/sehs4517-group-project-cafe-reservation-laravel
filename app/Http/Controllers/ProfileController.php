@@ -20,7 +20,6 @@ class ProfileController extends Controller {
         $user = Auth::user();
         $user->update($request->validated());
 
-        $request->request->remove('edit');
         return redirect('/profile')->with('success', 'Profile updated!');
     }
 
@@ -31,7 +30,6 @@ class ProfileController extends Controller {
             'password_hash' => Hash::make($request->input('password'))
         ]);
 
-        $request->request->remove('edit');
         return redirect('/profile')->with('success', 'Password updated!');
     }
 }
