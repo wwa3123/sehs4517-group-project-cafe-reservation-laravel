@@ -27,3 +27,5 @@ Route::middleware(['auth'])->group(function() {
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 });
+// TANG Zikun's routes
+require __DIR__.'/web_login_and_history.php';
