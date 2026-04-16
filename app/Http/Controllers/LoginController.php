@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Member;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
