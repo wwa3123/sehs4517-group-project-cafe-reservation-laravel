@@ -26,15 +26,11 @@ class LoginController extends Controller
             'password' => 'required'
         ]);
 
-        $member = Member::where('email', $request->email)->first();
-
-        if ($member && Hash::check($request->password, $member->password_hash)) {
+        // TODO: add $table->rememberToken(); to the member migration for remember me functionailities
+        // if (Auth::attempt($credentials, $request->boolean("remember"))) {
+        if (Auth::attempt($credentials)) {
             $request->session()->regenerate();
-            Session::put('member', [
-                'id' => $member->member_id,
-                'first_name' => $member->first_name,
-                'last_name' => $member->last_name,
-            ]);
+
             return redirect()->route('reserve');
         } else {
             return back()->withErrors([
