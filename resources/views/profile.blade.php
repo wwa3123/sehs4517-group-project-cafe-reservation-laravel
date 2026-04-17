@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite(['resources/css/app.css', 'resources/js/validation.js'])
-
-    <title>Profile - Boardgame Café</title>
-</head>
-
-<body class="bg-gray-100 text-gray-900">
-    <div class="max-w-2xl mx-auto p-8 bg-white shadow rounded-lg mt-10">
+@extends('layouts.app')
+@section('title', 'Profile')
+@push('head')
+    @vite('resources/js/validation.js')
+@endpush
+@section('content')
+    <div class="max-w-2xl mx-auto px-4 py-10 sm:px-6">
         @if (session()->has('success'))
             <h1 class="text-3xl font-bold mb-6 pb-2">
                 {{ session('success') }}
@@ -124,6 +117,4 @@
             </form>
         @endif
     </div>
-</body>
-
-</html>
+@endsection

@@ -1,32 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reservation Confirmed - Game Cafe</title>
-    
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Fonts -->
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
-    <script>
-        tailwind.config = {
-            content: [],
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Instrument Sans', 'system-ui', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-</head>
-
-<body class="bg-[#FDFDFC] min-h-screen flex items-center justify-center p-6 font-sans">
-
+@extends('layouts.app')
+@section('title', 'Reservation Confirmed')
+@section('content')
+<div class="flex justify-center py-10 px-6">
     <div class="max-w-lg w-full">
 
         <div class="bg-white rounded-3xl shadow-2xl p-8 border border-gray-200 flex flex-col gap-8">
@@ -102,6 +77,5 @@
 
         </div>
     </div>
-
-</body>
-</html>
+</div>
+@endsection

@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Reservation</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50 text-gray-900 min-h-screen">
+@extends('layouts.app')
+@section('title', 'Create Reservation')
+@section('content')
     <main class="max-w-3xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-8">
             <div class="mb-8 flex items-center justify-between gap-4">
@@ -191,6 +185,8 @@
             </form>
         </div>
     </main>
+@endsection
+@push('scripts')
     <script>
         // ── Games data from server ──────────────────────────────────────────
         const allGames = {!! json_encode($games->map(fn($g) => [
@@ -367,5 +363,4 @@
 
         dateInput.addEventListener('change', refreshSlots);
     </script>
-</body>
-</html>
+@endpush
