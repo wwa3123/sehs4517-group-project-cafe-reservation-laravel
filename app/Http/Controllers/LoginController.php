@@ -23,7 +23,7 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->boolean("remember"))) {
             $request->session()->regenerate();
 
-            return redirect()->route('reserve');
+            return redirect()->route('reservations.index');
         } else {
             return back()->withErrors([
                 'email' => 'Invalid email or password.'
