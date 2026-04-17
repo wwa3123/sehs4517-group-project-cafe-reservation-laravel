@@ -51,6 +51,25 @@
                 <p class="text-sm text-gray-500 text-center">Scan for reservation details</p>
             </div>
 
+            <!-- Loyalty Summary -->
+            @if(($earnedTokens ?? 0) > 0 || ($discountApplied ?? 0) > 0)
+            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200 text-sm space-y-1">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Loyalty Summary</h3>
+                @if(($earnedTokens ?? 0) > 0)
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Tokens Earned</span>
+                    <span class="font-semibold text-emerald-600">+{{ $earnedTokens }}</span>
+                </div>
+                @endif
+                @if(($discountApplied ?? 0) > 0)
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Discount Applied</span>
+                    <span class="font-semibold text-emerald-600">-${{ number_format($discountApplied, 2) }}</span>
+                </div>
+                @endif
+            </div>
+            @endif
+
             <!-- Popular Games -->
             @if(!empty($gameSuggestions))
             <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
