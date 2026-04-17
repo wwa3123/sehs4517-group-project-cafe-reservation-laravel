@@ -136,48 +136,4 @@ class ReservationController extends Controller
         return view('reservations.show', compact('reservation'));
     }
 
-    public function redeem($reservation)
-    {
-        $reservation = Reservation::with('member')->findOrFail($reservation);
-        $member = $reservation->member;
-        $availableTokens = $member->loyalty_points;
-        $discountTiers = LoyaltyRedemptionService::getDiscountTiers($availableTokens);
-
-        return view('reservations.redeem', compact('reservation', 'discountTiers', 'availableTokens'));
-    }
-
-    public function applyDiscount(Request $request, $reservation)
-    {
-        $reservation = Reservation::with('member')->findOrFail($reservation);
-        $availableTokens = max(0, $reservation->member->loyalty_points - $reservation->discount_tokens_used);
-
-        if ($reservation->discount_tokens_used > 0 || $reservation->discount_amount_saved > 0) {
-            return back()->withErrors('A loyalty discount has already been applied to this reservation.');
-        }
-
-        if ($availableTokens < 1) {
-            return back()->withErrors('No loyalty tokens are available to redeem for this reservation.');
-        }
-
-        $request->validate([
-            'tokens_to_spend' => ['required', 'integer', 'min:1', 'max:' . $availableTokens],
-        ]);
-
-        $tokens = $request->input('tokens_to_spend');
-        $success = LoyaltyRedemptionService::applyDiscount(
-            $reservation,
-            $reservation->member,
-            $tokens
-        );
-
-        if (!$success) {
-            return back()->withErrors('Unable to apply discount.');
-        }
-
-        $discountAmount = LoyaltyRedemptionService::calculateDiscount($tokens);
-        return redirect()->route('reservations.show', $reservation)->with(
-            'success',
-            "Applied {$tokens} loyalty tokens for \${$discountAmount} discount!"
-        );
-    }
 }

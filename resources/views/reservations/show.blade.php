@@ -68,18 +68,6 @@
                 </ul>
             </section>
 
-            @if($reservation->discount_tokens_used == 0 && $reservation->member->loyalty_points > 0)
-            <div class="rounded-xl border border-amber-200 bg-amber-50 p-4 flex items-center justify-between gap-4">
-                <div class="flex items-center gap-2 text-sm text-amber-800">
-                    <span class="text-lg">🪙</span>
-                    <span>You have <strong>{{ $reservation->member->loyalty_points }}</strong> loyalty tokens available. Redeem them for a discount on this reservation.</span>
-                </div>
-                <a href="{{ route('reservations.redeem', $reservation->reservation_id) }}"
-                   class="inline-flex items-center rounded-lg bg-amber-500 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-600 whitespace-nowrap">
-                    Redeem Tokens
-                </a>
-            </div>
-            @endif
         </div>
     </main>
 @endsection
