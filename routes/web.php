@@ -34,6 +34,16 @@ require __DIR__.'/web_login_and_history.php';
 
 // Reservation thank you page
 Route::get('/reservation/thankyou', function () {
+
+//fetch some popular games from database
+$popularGames = \App\Models|Game::inRandomOrder()->limit(3)->get(['title'])->pluck('title')->toArray();
+
+
+//if no games in database yet, use fallback
+if (empty($popularGames)) {
+    $popularGames = ['Catan', 'Ticket to Ride', 'Codenames'];
+}
+
     // In a real app, this would come from a session or database
     return view('reservation-thankyou', [
         'email' => session('email', 'guest@example.com'),
@@ -41,6 +51,6 @@ Route::get('/reservation/thankyou', function () {
         'timeSlot' => session('timeSlot', '2:00 PM - 4:00 PM'),
         'table' => session('table', 'Gaming Table 1'),
         'showQrCode' => false, // Set to true to show QR code
-        'gameSuggestions' => ['Catan', 'Ticket to Ride', 'Codenames'], // Optional game suggestions
+        'gameSuggestions' => $popularGames, // Optional game suggestions
     ]);
 })->name('reservation.thankyou');
