@@ -58,12 +58,6 @@
                     <h2 class="text-lg font-semibold text-gray-900 mb-2">Description</h2>
                     <p class="text-sm text-gray-700">{{ $event->event_descriptions ?: 'No description provided.' }}</p>
                 </div>
-
-                <div class="pt-4 border-t border-gray-200">
-                    <a href="{{ route('reservations.create', ['event_id' => $event->event_id, 'date' => \Carbon\Carbon::parse($event->event_date)->toDateString()]) }}" class="inline-flex items-center justify-center rounded-lg border border-indigo-300 px-4 py-2.5 text-sm font-medium text-indigo-700 hover:bg-indigo-50">
-                        Create Event Reservation Slot
-                    </a>
-                </div>
             </section>
 
             <aside class="rounded-xl border border-gray-200 bg-white shadow-sm p-6 space-y-4">
@@ -74,12 +68,17 @@
 
                     <div>
                         <label for="member_id" class="mb-1.5 block text-sm font-medium text-gray-700">Member</label>
+                        @if(auth()->user()?->role === 'admin')
                         <select name="member_id" id="member_id" required class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                             <option value="" disabled {{ old('member_id') ? '' : 'selected' }}>Select a member</option>
                             @foreach($members as $member)
                                 <option value="{{ $member->member_id }}" {{ (string) old('member_id') === (string) $member->member_id ? 'selected' : '' }}>{{ $member->first_name }} {{ $member->last_name }}</option>
                             @endforeach
                         </select>
+                        @else
+                        <input type="text" disabled value="{{ auth()->user()->first_name }} {{ auth()->user()->last_name }}" class="block w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2.5 text-sm text-gray-600 cursor-not-allowed">
+                        <input type="hidden" name="member_id" value="{{ auth()->user()->member_id }}">
+                        @endif
                     </div>
 
                     <div>
@@ -94,6 +93,7 @@
             </aside>
         </div>
 
+        @if(auth()->user()?->role === 'admin')
         <section class="mt-6 rounded-xl border border-gray-200 bg-white shadow-sm p-6">
             <h2 class="text-lg font-semibold text-gray-900 mb-3">Registrations</h2>
             <div class="overflow-x-auto">
@@ -121,6 +121,7 @@
                 </table>
             </div>
         </section>
+        @endif
     </main>
 </body>
 </html>

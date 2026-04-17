@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Reservation;
 use App\Models\Member;
 use App\Models\Event;
+use App\Models\Game;
 use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Models\ReservedSlot;
@@ -44,10 +45,11 @@ class ReservationController extends Controller
         $events = Event::orderBy('event_date')->get();
         $tables = Table::all();
         $timeSlots = TimeSlot::all();
+        $games = Game::all();
         $prefillEventId = $request->query('event_id');
         $prefillDate = $request->query('date');
 
-        return view('reservations.create', compact('members', 'events', 'tables', 'timeSlots', 'prefillEventId', 'prefillDate'));
+        return view('reservations.create', compact('members', 'events', 'tables', 'timeSlots', 'games', 'prefillEventId', 'prefillDate'));
     }
 
     public function store(Request $request)

@@ -79,10 +79,12 @@ Route::prefix('events')->name('events.')->middleware(['auth'])->group(function (
     Route::post('/{event}/join', function (Request $request, $event) {
         abort_unless(auth()->check(), 403);
 
+        $eventModel = \App\Models\Event::findOrFail($event);
+
         $request->merge([
             'member_id' => auth()->id(),
         ]);
 
-        return app(EventController::class)->join($request, $event);
+        return app(EventController::class)->join($request, $eventModel);
     })->name('join');
 });
