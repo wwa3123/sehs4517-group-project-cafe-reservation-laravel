@@ -55,25 +55,15 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'member_id' => ['nullable', 'required_without:event_id', 'exists:members,member_id'],
-            'event_id' => ['nullable', 'exists:events,event_id'],
+            'member_id' => ['required', 'exists:members,member_id'],
             'date' => ['required', 'date', 'after_or_equal:today'],
             'num_guests' => ['required', 'integer', 'min:1'],
             'table_id' => ['required', 'exists:tables,table_id'],
-
-            // --- VALIDATION FOR MULTIPLE SLOTS ---
             'time_slots_id' => ['required', 'array', 'min:1'],
-
-            // Use the '*' to apply this rule to each item in the time_slots_id array
             'time_slots_id.*' => [
                 'distinct',
                 'exists:time_slots,time_slots_id',
-
-                // Custom Closure Rule for availability
                 function ($attribute, $value, $fail) use ($request) {
-                    // $attribute is 'time_slots_id.0', 'time_slots_id.1', etc.
-                    // $value is the actual time_slot_id
-                    
                     $isBooked = ReservedSlot::where('table_id', $request->input('table_id'))
                         ->where('time_slots_id', $value)
                         ->whereHas('reservation', function ($query) use ($request) {
@@ -82,7 +72,6 @@ class ReservationController extends Controller
                         ->exists();
 
                     if ($isBooked) {
-                        // Find the time slot to make the error message more user-friendly
                         $timeSlot = TimeSlot::find($value);
                         $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
                         $fail("The selected table is not available at {$startTime}.");
@@ -91,37 +80,29 @@ class ReservationController extends Controller
             ],
         ]);
 
-        if ($request->filled('event_id')) {
-            $event = Event::findOrFail($request->input('event_id'));
-            $reservationDate = Carbon::parse($request->input('date'))->toDateString();
-            $eventDate = Carbon::parse($event->event_date)->toDateString();
-
-            if ($reservationDate !== $eventDate) {
-                return back()->withErrors([
-                    'date' => 'Reservation date must match the selected event date.',
-                ])->withInput();
-            }
-
-            if ((int) $request->input('num_guests') > (int) $event->max_participants) {
-                return back()->withErrors([
-                    'num_guests' => 'Number of guests cannot exceed event maximum participants.',
-                ])->withInput();
-            }
-        }
-        
         // If validation passes, proceed to the service
         $reservation = $this->reservationService->createReservation($request->all());
         $earnedTokens = (int) optional($reservation->loyaltyTransactions->first())->points;
 
+        // Apply loyalty token redemption if requested
+        $tokensToSpend = (int) $request->input('tokens_to_spend', 0);
+        $discountApplied = 0;
+        if ($tokensToSpend > 0 && $reservation->member) {
+            $reservation->load('member');
+            $applied = LoyaltyRedemptionService::applyDiscount($reservation, $reservation->member, $tokensToSpend);
+            if ($applied) {
+                $discountApplied = LoyaltyRedemptionService::calculateDiscount($tokensToSpend);
+            }
+        }
+
         $successMessage = "Reservation created successfully.";
 
-        if (!$reservation->event) {
-            $successMessage .= " Earned {$earnedTokens} loyalty tokens. Current balance: {$reservation->member->loyalty_points}.";
+        $reservation->member->refresh();
+        $successMessage .= " Earned {$earnedTokens} loyalty tokens.";
+        if ($discountApplied > 0) {
+            $successMessage .= " Redeemed {$tokensToSpend} tokens for a \$" . number_format($discountApplied, 2) . " discount.";
         }
-
-        if ($reservation->event) {
-            $successMessage .= " Linked event: {$reservation->event->event_name}. Reservation owner is set to system dummy member.";
-        }
+        $successMessage .= " Current balance: {$reservation->member->loyalty_points}.";
 
         return redirect()->route('reservations.index')->with('success', $successMessage);
     }
