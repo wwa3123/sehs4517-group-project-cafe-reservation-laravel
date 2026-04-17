@@ -77,15 +77,20 @@
             </div>
 
             <!-- Popular Games -->
+            @if(!empty($gameSuggestions))
             <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
-                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-5 text-center">Popular Games Available</h3>
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-5 text-center">
+                    Popular Games Available
+                </h3>
                 <div class="flex flex-wrap gap-3 justify-center">
-                    <span class="px-5 py-2.5 bg-white text-sm font-medium rounded-full border border-gray-200">Dungeons & Dragons</span>
-                    <span class="px-5 py-2.5 bg-white text-sm font-medium rounded-full border border-gray-200">Catan</span>
-                    <span class="px-5 py-2.5 bg-white text-sm font-medium rounded-full border border-gray-200">Ticket to Ride</span>
-                    <span class="px-5 py-2.5 bg-white text-sm font-medium rounded-full border border-gray-200">Codenames</span>
+                    @foreach($gameSuggestions as $game)
+                        <span class="px-5 py-2.5 bg-white text-sm font-medium rounded-full border border-gray-200">
+                            {{ $game }}
+                        </span>
+                    @endforeach
                 </div>
             </div>
+            @endif
 
             <!-- OK Button -->
             <div class="flex justify-center pt-4">
