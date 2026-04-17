@@ -9,8 +9,8 @@ use App\Http\Controllers\EventController;
 use App\Models\ReservedSlot;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('intro');
+})->name('home');
 
 Route::get('/tailwind', function () {
     return view('tailwindTest');
