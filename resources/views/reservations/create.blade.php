@@ -109,24 +109,22 @@
                         <label data-type="{{ $table->type }}"
                                data-capacity="{{ $table->capacity }}"
                                data-table-id="{{ $table->table_id }}"
-                               class="table-card cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 transition hover:border-indigo-400 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
+                               class="table-card cursor-pointer rounded-xl border-2 border-gray-200 bg-white overflow-hidden transition hover:border-indigo-400 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
                             <input type="radio" name="table_id" value="{{ $table->table_id }}" class="sr-only" {{ (string) old('table_id') === (string) $table->table_id ? 'checked' : '' }} required>
-                            <div class="flex items-start gap-3">
-                                @if($table->photo_url)
-                                    <img src="{{ $table->photo_url }}" alt="{{ $table->name }}" class="h-14 w-14 rounded-lg object-cover flex-shrink-0">
-                                @else
-                                    <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-2xl">{{ $icon }}</div>
-                                @endif
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-medium text-sm text-gray-900">{{ $table->name }}</span>
-                                        <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeClass }}">{{ $table->type }}</span>
-                                    </div>
-                                    <p class="mt-1 text-xs text-gray-500">Max players: <span class="font-semibold text-gray-700">{{ $table->capacity }}</span></p>
-                                    @if($table->description)
-                                    <p class="mt-1 text-xs text-gray-400 truncate">{{ $table->description }}</p>
-                                    @endif
+                            @if($table->photo_url)
+                                <img src="{{ asset($table->photo_url) }}" alt="{{ $table->name }}" class="w-full h-36 object-cover">
+                            @else
+                                <div class="w-full h-36 flex items-center justify-center bg-gray-100 text-4xl">{{ $icon }}</div>
+                            @endif
+                            <div class="p-3">
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <span class="font-medium text-sm text-gray-900">{{ $table->name }}</span>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeClass }}">{{ $table->type }}</span>
                                 </div>
+                                <p class="text-xs text-gray-500">Max players: <span class="font-semibold text-gray-700">{{ $table->capacity }}</span></p>
+                                @if($table->description)
+                                <p class="mt-1 text-xs text-gray-400 truncate">{{ $table->description }}</p>
+                                @endif
                             </div>
                         </label>
                         @endforeach

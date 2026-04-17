@@ -117,7 +117,7 @@
                 @foreach($categoryItems as $item)
                 <div class="menu-card">
                     @if($item->photo_url)
-                        <img src="{{ $item->photo_url }}" alt="{{ $item->item_name }}" class="menu-card-img">
+                        <img src="{{ asset($item->photo_url) }}" alt="{{ $item->item_name }}" class="menu-card-img">
                     @else
                         <div class="menu-card-img-placeholder">🍽️</div>
                     @endif
