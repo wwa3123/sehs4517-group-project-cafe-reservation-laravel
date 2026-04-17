@@ -38,6 +38,14 @@ class Event extends Model
     }
 
     /**
+     * Get reservations linked to this event.
+     */
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class, 'event_id', 'event_id');
+    }
+
+    /**
      * Get all the event's loyalty transactions.
      */
     public function loyaltyTransactions()

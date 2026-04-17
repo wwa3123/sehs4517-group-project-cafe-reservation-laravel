@@ -10,7 +10,10 @@
     <main class="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">All Reservations</h1>
-            <a href="{{ route('reservations.create') }}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700">Create New Reservation</a>
+            <div class="flex gap-2">
+                <a href="{{ route('events.index') }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">Events</a>
+                <a href="{{ route('reservations.create') }}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700">Create New Reservation</a>
+            </div>
         </div>
 
         @if(session('success'))
@@ -27,6 +30,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">ID</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Member</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Date</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Event</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Guests</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Table</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Time Slot</th>
@@ -41,6 +45,9 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">#{{ $reservation->reservation_id }}</td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('Y-m-d') }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    {{ $reservation->event->event_name ?? 'None' }}
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->num_guests }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     @foreach($reservation->reservedSlots as $slot)
@@ -75,7 +82,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
+                                <td colspan="10" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -28,6 +28,10 @@
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->date->format('F j, Y') }}</dd>
                 </div>
                 <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Event</dt>
+                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->event->event_name ?? 'None' }}</dd>
+                </div>
+                <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Number of Guests</dt>
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->num_guests }}</dd>
                 </div>

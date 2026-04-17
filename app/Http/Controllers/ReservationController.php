@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Reservation;
 use App\Models\Member;
+use App\Models\Event;
 use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Models\ReservedSlot;
@@ -23,22 +24,29 @@ class ReservationController extends Controller
 
     public function index()
     {
-        $reservations = Reservation::with('member', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions')->get();
+        $reservations = Reservation::with('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions')->get();
         return view('reservations.index', compact('reservations'));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        $members = Member::all();
+        $members = Member::where('role', '!=', 'system')
+            ->orWhereNull('role')
+            ->get();
+        $events = Event::orderBy('event_date')->get();
         $tables = Table::all();
         $timeSlots = TimeSlot::all();
-        return view('reservations.create', compact('members', 'tables', 'timeSlots'));
+        $prefillEventId = $request->query('event_id');
+        $prefillDate = $request->query('date');
+
+        return view('reservations.create', compact('members', 'events', 'tables', 'timeSlots', 'prefillEventId', 'prefillDate'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'member_id' => ['required', 'exists:members,member_id'],
+            'member_id' => ['nullable', 'required_without:event_id', 'exists:members,member_id'],
+            'event_id' => ['nullable', 'exists:events,event_id'],
             'date' => ['required', 'date', 'after_or_equal:today'],
             'num_guests' => ['required', 'integer', 'min:1'],
             'table_id' => ['required', 'exists:tables,table_id'],
@@ -71,20 +79,45 @@ class ReservationController extends Controller
                 },
             ],
         ]);
+
+        if ($request->filled('event_id')) {
+            $event = Event::findOrFail($request->input('event_id'));
+            $reservationDate = Carbon::parse($request->input('date'))->toDateString();
+            $eventDate = Carbon::parse($event->event_date)->toDateString();
+
+            if ($reservationDate !== $eventDate) {
+                return back()->withErrors([
+                    'date' => 'Reservation date must match the selected event date.',
+                ])->withInput();
+            }
+
+            if ((int) $request->input('num_guests') > (int) $event->max_participants) {
+                return back()->withErrors([
+                    'num_guests' => 'Number of guests cannot exceed event maximum participants.',
+                ])->withInput();
+            }
+        }
         
         // If validation passes, proceed to the service
         $reservation = $this->reservationService->createReservation($request->all());
         $earnedTokens = (int) optional($reservation->loyaltyTransactions->first())->points;
 
-        return redirect()->route('reservations.index')->with(
-            'success',
-            "Reservation created successfully. Earned {$earnedTokens} loyalty tokens. Current balance: {$reservation->member->loyalty_points}."
-        );
+        $successMessage = "Reservation created successfully.";
+
+        if (!$reservation->event) {
+            $successMessage .= " Earned {$earnedTokens} loyalty tokens. Current balance: {$reservation->member->loyalty_points}.";
+        }
+
+        if ($reservation->event) {
+            $successMessage .= " Linked event: {$reservation->event->event_name}. Reservation owner is set to system dummy member.";
+        }
+
+        return redirect()->route('reservations.index')->with('success', $successMessage);
     }
 
     public function show(Reservation $reservation)
     {
-        $reservation->load('member', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
+        $reservation->load('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
         return view('reservations.show', compact('reservation'));
     }
 
