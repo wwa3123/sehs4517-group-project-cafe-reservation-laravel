@@ -76,12 +76,12 @@
 
             <div class="mt-4 flex gap-3">
                 @if($editing == 1)
-                    <button type="submit" class="bg-green-600 text-white px-6 py-2 rounded">Update Profile</button>
-                    <a href="/profile" class="bg-gray-400 text-white px-6 py-2 rounded">Cancel</a>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-[var(--accent,#4c9f2f)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--accent-dark,#3b7e24)] transition-colors">Update Profile</button>
+                    <a href="/profile" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Cancel</a>
                 @elseif($editing == 2)
                 @else
-                    <a href="/profile?edit=1" class="bg-blue-600 text-white px-6 py-2 rounded">Edit Profile</a>
-                    <a href="/profile/?edit=2" class="bg-gray-800 text-white px-6 py-2 rounded">Change Password</a>
+                    <a href="/profile?edit=1" class="inline-flex items-center justify-center rounded-lg bg-[var(--accent,#4c9f2f)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--accent-dark,#3b7e24)] transition-colors">Edit Profile</a>
+                    <a href="/profile/?edit=2" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Change Password</a>
                 @endif
             </div>
         </form>
@@ -111,8 +111,8 @@
                 </div>
 
                 <div class="flex gap-3">
-                    <button type="submit" class="bg-gray-800 text-white px-4 py-2 rounded">Confirm</button>
-                    <a href="/profile" class="bg-gray-400 text-white px-6 py-2 rounded">Cancel</a>
+                    <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-[var(--accent,#4c9f2f)] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[var(--accent-dark,#3b7e24)] transition-colors">Confirm</button>
+                    <a href="/profile" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition-colors">Cancel</a>
                 </div>
             </form>
         @endif
