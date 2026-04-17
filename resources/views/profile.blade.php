@@ -117,4 +117,13 @@
             </form>
         @endif
     </div>
+
+    <div class="max-w-2xl mx-auto px-4 pb-10 sm:px-6">
+        <div class="border-t pt-6 mt-2">
+            <h2 class="text-lg font-semibold mb-3">Quick Links</h2>
+            <a href="{{ route('reservation.history') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors">
+                📋 My Reservation History
+            </a>
+        </div>
+    </div>
 @endsection
