@@ -38,7 +38,7 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-700">#{{ $reservation->reservation_id }}</td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('Y-m-d') }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('M j, Y') }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     {{ $reservation->event?->event_name ?? 'None' }}
                                 </td>
