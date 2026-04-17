@@ -12,7 +12,9 @@
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">Events</h1>
             <div class="flex gap-2">
                 <a href="{{ route('reservations.index') }}" class="inline-flex items-center justify-center rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100">Reservations</a>
+                @if(auth()->user()?->role === 'admin')
                 <a href="{{ route('events.create') }}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700">Create Event</a>
+                @endif
             </div>
         </div>
 

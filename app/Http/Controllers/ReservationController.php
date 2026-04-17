@@ -24,7 +24,15 @@ class ReservationController extends Controller
 
     public function index()
     {
-        $reservations = Reservation::with('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions')->get();
+        $user = auth()->user();
+
+        $query = Reservation::with('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
+
+        if ($user->role !== 'admin') {
+            $query->where('member_id', $user->member_id);
+        }
+
+        $reservations = $query->get();
         return view('reservations.index', compact('reservations'));
     }
 
