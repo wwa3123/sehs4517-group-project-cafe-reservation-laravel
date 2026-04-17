@@ -25,6 +25,7 @@ return new class extends Migration
             $table->boolean('subscribe_events')->default(false);
             $table->integer('loyalty_points')->default(0);
             $table->timestamps();
+            $table->rememberToken();
         });
     }
 
