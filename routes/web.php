@@ -13,7 +13,7 @@ Route::get('/tailwind', function () {
     return view('tailwindTest');
 });
 
-Route::get('/register', [RegistrationController::class, 'show']);
+Route::get('/register', [RegistrationController::class, 'show'])->name('register');
 Route::post('/register', [RegistrationController::class, 'register']);
 Route::get('/check-email', [RegistrationController::class, 'checkEmail']);
 Route::post('/forget-old', function() {
@@ -23,9 +23,10 @@ Route::post('/forget-old', function() {
 
 
 Route::middleware(['auth'])->group(function() {
-    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update']);
     Route::put('/profile/password', [ProfileController::class, 'updatePassword']);
 });
+
 // TANG Zikun's routes
 require __DIR__.'/web_login_and_history.php';
