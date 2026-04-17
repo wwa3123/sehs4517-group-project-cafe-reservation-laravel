@@ -61,7 +61,7 @@ document.getElementById('reset')?.addEventListener('click', () => {
     const bar = document.getElementById('strength-fill');
     const barcontainer = document.getElementById('strength-bar');
     const form = document.getElementById('reg');
-    const errormsgs = form.querySelectorAll('.errormsg');
+    const errormsgs = form.querySelectorAll('.form-error');
     const inputelements = form.querySelectorAll('input');
 
     fetch('/forget-old', {
@@ -77,7 +77,7 @@ document.getElementById('reset')?.addEventListener('click', () => {
         errormsgs.forEach(element => {
             if (element.name == '_token') return;
             element.innerText = '';      
-            element.className = element.id == 'email-msg' ? 'text-red-500 text-sm mb-4 errormsg' : '';
+            element.className = element.id == 'email-msg' ? 'form-error text-sm mb-4' : '';
         });
     });
 
