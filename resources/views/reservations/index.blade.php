@@ -30,6 +30,8 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Guests</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Table</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Time Slot</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Loyalty</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Discount</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Actions</th>
                         </tr>
                     </thead>
@@ -50,13 +52,30 @@
                                         <div>{{ \Carbon\Carbon::parse($slot->timeSlot->start_time)->format('h:i A') }}</div>
                                     @endforeach
                                 </td>
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    @php
+                                        $earned = optional($reservation->loyaltyTransactions->first())->points;
+                                    @endphp
+                                    <div class="inline-flex items-center rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-medium text-indigo-700">
+                                        +{{ $earned ?? 0 }} tokens
+                                    </div>
+                                </td>
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    @if($reservation->discount_tokens_used > 0)
+                                        <div class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                                            -{{ $reservation->discount_tokens_used }} tokens
+                                        </div>
+                                    @else
+                                        <span class="text-gray-400">—</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-sm">
                                     <a href="{{ route('reservations.show', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">View</a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
+                                <td colspan="9" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
                             </tr>
                         @endforelse
                     </tbody>

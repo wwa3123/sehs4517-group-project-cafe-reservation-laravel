@@ -26,4 +26,8 @@ Route::prefix('reservations')->name('reservations.')->group(function () {
 
     Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
 
+    Route::get('/{reservation}/redeem', [ReservationController::class, 'redeem'])->name('redeem');
+
+    Route::post('/{reservation}/apply-discount', [ReservationController::class, 'applyDiscount'])->name('applyDiscount');
+
     });

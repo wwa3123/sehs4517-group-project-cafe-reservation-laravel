@@ -9,6 +9,7 @@ use App\Models\TimeSlot;
 use App\Models\ReservedSlot;
 use Illuminate\Http\Request;
 use App\Services\ReservationService;
+use App\Services\LoyaltyRedemptionService;
 use Carbon\Carbon;
 
 class ReservationController extends Controller
@@ -22,7 +23,7 @@ class ReservationController extends Controller
 
     public function index()
     {
-        $reservations = Reservation::with('member', 'reservedSlots.table', 'reservedSlots.timeSlot')->get();
+        $reservations = Reservation::with('member', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions')->get();
         return view('reservations.index', compact('reservations'));
     }
 
@@ -72,14 +73,53 @@ class ReservationController extends Controller
         ]);
         
         // If validation passes, proceed to the service
-        $this->reservationService->createReservation($request->all());
+        $reservation = $this->reservationService->createReservation($request->all());
+        $earnedTokens = (int) optional($reservation->loyaltyTransactions->first())->points;
 
-        return redirect()->route('reservations.index')->with('success', 'Reservation created successfully for multiple time slots.');
+        return redirect()->route('reservations.index')->with(
+            'success',
+            "Reservation created successfully. Earned {$earnedTokens} loyalty tokens. Current balance: {$reservation->member->loyalty_points}."
+        );
     }
 
     public function show(Reservation $reservation)
     {
-        $reservation->load('member', 'reservedSlots.table', 'reservedSlots.timeSlot');
+        $reservation->load('member', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
         return view('reservations.show', compact('reservation'));
+    }
+
+    public function redeem($reservation)
+    {
+        $reservation = Reservation::with('member')->findOrFail($reservation);
+        $member = $reservation->member;
+        $availableTokens = $member->loyalty_points - $reservation->discount_tokens_used;
+        $discountTiers = LoyaltyRedemptionService::getDiscountTiers($availableTokens);
+
+        return view('reservations.redeem', compact('reservation', 'discountTiers', 'availableTokens'));
+    }
+
+    public function applyDiscount(Request $request, $reservation)
+    {
+        $reservation = Reservation::with('member')->findOrFail($reservation);
+        $request->validate([
+            'tokens_to_spend' => ['required', 'integer', 'min:1', 'max:' . $reservation->member->loyalty_points],
+        ]);
+
+        $tokens = $request->input('tokens_to_spend');
+        $success = LoyaltyRedemptionService::applyDiscount(
+            $reservation,
+            $reservation->member,
+            $tokens
+        );
+
+        if (!$success) {
+            return back()->withErrors('Unable to apply discount.');
+        }
+
+        $discountAmount = LoyaltyRedemptionService::calculateDiscount($tokens);
+        return redirect()->route('reservations.show', $reservation)->with(
+            'success',
+            "Applied {$tokens} loyalty tokens for \${$discountAmount} discount!"
+        );
     }
 }

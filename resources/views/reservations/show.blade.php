@@ -31,11 +31,39 @@
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Number of Guests</dt>
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->num_guests }}</dd>
                 </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Loyalty Tokens Earned</dt>
+                    <dd class="mt-1 text-sm text-gray-700">{{ (int) optional($reservation->loyaltyTransactions->first())->points }} tokens</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Member Token Balance</dt>
+                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->member->loyalty_points }} tokens</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Discount Redeemed</dt>
+                    <dd class="mt-1 text-sm text-gray-700">
+                        @if($reservation->discount_tokens_used > 0)
+                            <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
+                                {{ $reservation->discount_tokens_used }} tokens (${!! number_format($reservation->discount_amount_saved, 2) }})
+                            </span>
+                        @else
+                            <span class="text-gray-500">None</span>
+                        @endif
+                    </dd>
+                </div>
                 <div class="sm:col-span-2">
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Table</dt>
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->reservedSlots->first()->table->name ?? 'N/A' }}</dd>
                 </div>
             </dl>
+
+            @if($reservation->member->loyalty_points > 0)
+                <div class="border-t border-gray-200 pt-6">
+                    <a href="{{ route('reservations.redeem', $reservation) }}" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                        Redeem Loyalty Tokens
+                    </a>
+                </div>
+            @endif
 
             <section>
                 <h2 class="text-lg font-semibold text-gray-900 mb-3">Reserved Time Slots</h2>

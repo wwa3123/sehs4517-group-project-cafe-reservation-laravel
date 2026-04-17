@@ -15,6 +15,8 @@ class Reservation extends Model
         'member_id',
         'date',
         'num_guests',
+        'discount_tokens_used',
+        'discount_amount_saved',
     ];
 
     protected $casts = [
@@ -35,5 +37,13 @@ class Reservation extends Model
     public function reservedSlots()
     {
         return $this->hasMany(ReservedSlot::class, 'reservation_id', 'reservation_id');
+    }
+
+    /**
+     * Get all loyalty transactions for this reservation.
+     */
+    public function loyaltyTransactions()
+    {
+        return $this->morphMany(LoyaltyTxn::class, 'reference');
     }
 }

@@ -14,6 +14,10 @@
                 <a href="{{ route('reservations.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Back</a>
             </div>
 
+            <div class="mb-6 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+                Each reservation earns <span class="font-semibold">10 loyalty tokens</span>.
+            </div>
+
             @if ($errors->any())
                 <div class="mb-6 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
                     <ul class="list-disc pl-5 space-y-1 text-sm">
