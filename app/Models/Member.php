@@ -75,4 +75,8 @@ class Member extends Authenticatable
     public function getAuthPassword() {
         return $this->password_hash;
     }
+
+    public function getAuthPasswordName() {
+        return 'password_hash';
+    }
 }

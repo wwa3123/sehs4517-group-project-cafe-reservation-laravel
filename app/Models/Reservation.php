@@ -13,7 +13,6 @@ class Reservation extends Model
 
     protected $fillable = [
         'member_id',
-        'event_id',
         'date',
         'num_guests',
         'discount_tokens_used',

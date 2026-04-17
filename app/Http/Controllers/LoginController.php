@@ -10,15 +10,15 @@ class LoginController extends Controller
     // login page
     public function login()
     {
+        if (Auth::check()) {
+            return redirect()->route('reservations.index');
+        }
+
         return view('login'); 
     }
 
     public function verify(Request $request)
     {
-            $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
-        ]);
         $credentials = $request->validate([
             'email' => 'required|email',
             'password' => 'required'
@@ -27,7 +27,13 @@ class LoginController extends Controller
         if (Auth::attempt($credentials, $request->boolean("remember"))) {
             $request->session()->regenerate();
 
-            return redirect()->route('reserve');
+            $member = Auth::user();
+            $request->session()->put('member_id', $member->member_id);
+            $request->session()->put('member_name', $member->first_name . ' ' . $member->last_name);
+            $request->session()->put('member_email', $member->email);
+            $request->session()->put('member_role', $member->role);
+
+            return redirect()->route('reservations.index');
         } else {
             return back()->withErrors([
                 'email' => 'Invalid email or password.'

@@ -59,21 +59,26 @@ class EventController extends Controller
             'max_participants' => ['required', 'integer', 'min:1'],
             'event_date' => ['required', 'date', 'after_or_equal:today'],
             'num_guests' => ['required', 'integer', 'min:1'],
-            'table_id' => ['required', 'exists:tables,table_id'],
+            'table_id' => ['required', 'array', 'min:1'],
+            'table_id.*' => ['exists:tables,table_id'],
             'time_slots_id' => ['required', 'array', 'min:1'],
             'time_slots_id.*' => [
                 'distinct',
                 'exists:time_slots,time_slots_id',
                 function ($attribute, $value, $fail) use ($request) {
                     $eventDate = Carbon::parse($request->input('event_date'))->toDateString();
-                    $isBooked = ReservedSlot::where('table_id', $request->input('table_id'))
-                        ->where('time_slots_id', $value)
-                        ->whereHas('reservation', fn ($q) => $q->whereDate('date', $eventDate))
-                        ->exists();
-                    if ($isBooked) {
-                        $timeSlot = TimeSlot::find($value);
-                        $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
-                        $fail("The selected table is not available at {$startTime} on the event date.");
+                    foreach ((array) $request->input('table_id') as $tableId) {
+                        $isBooked = ReservedSlot::where('table_id', $tableId)
+                            ->where('time_slots_id', $value)
+                            ->whereHas('reservation', fn ($q) => $q->whereDate('date', $eventDate))
+                            ->exists();
+                        if ($isBooked) {
+                            $timeSlot = TimeSlot::find($value);
+                            $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
+                            $tableName = \App\Models\Table::find($tableId)?->name ?? $tableId;
+                            $fail("Table '{$tableName}' is not available at {$startTime} on the event date.");
+                            return;
+                        }
                     }
                 },
             ],
@@ -86,13 +91,25 @@ class EventController extends Controller
                 'event_name', 'event_descriptions', 'event_fee', 'max_participants', 'event_date',
             ]));
 
-            $reservationService->createReservation([
-                'event_id'      => $event->event_id,
-                'date'          => Carbon::parse($event->event_date)->toDateString(),
-                'num_guests'    => $request->input('num_guests'),
-                'table_id'      => $request->input('table_id'),
-                'time_slots_id' => $request->input('time_slots_id'),
+            $systemMember = \App\Models\Member::create([
+                'email'            => 'event-' . $event->event_id . '@system.local',
+                'first_name'       => $event->event_name,
+                'last_name'        => '(Event)',
+                'password_hash'    => \Illuminate\Support\Facades\Hash::make(bin2hex(random_bytes(16))),
+                'role'             => 'system',
+                'subscribe_events' => false,
+                'loyalty_points'   => 0,
             ]);
+
+            foreach ((array) $request->input('table_id') as $tableId) {
+                $reservationService->createReservation([
+                    'member_id'     => $systemMember->member_id,
+                    'date'          => Carbon::parse($event->event_date)->toDateString(),
+                    'num_guests'    => $request->input('num_guests'),
+                    'table_id'      => $tableId,
+                    'time_slots_id' => $request->input('time_slots_id'),
+                ]);
+            }
 
             return $event;
         });

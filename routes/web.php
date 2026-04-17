@@ -39,7 +39,7 @@ require __DIR__.'/web_login_and_history.php';
 Route::get('/reservation/thankyou', function () {
 
 //fetch some popular games from database
-$popularGames = \App\Models|Game::inRandomOrder()->limit(3)->get(['title'])->pluck('title')->toArray();
+$popularGames = \App\Models\Game::inRandomOrder()->limit(3)->get(['title'])->pluck('title')->toArray();
 
 
 //if no games in database yet, use fallback
@@ -73,16 +73,18 @@ Route::get('/api/booked-slots', function (Request $request) {
 
 Route::prefix('events')->name('events.')->middleware(['auth'])->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
-    Route::get('/create', [EventController::class, 'create'])->name('create');
-    Route::post('/', [EventController::class, 'store'])->name('store');
+    Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
+    Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
     Route::get('/{event}', [EventController::class, 'show'])->name('show');
     Route::post('/{event}/join', function (Request $request, $event) {
         abort_unless(auth()->check(), 403);
+
+        $eventModel = \App\Models\Event::findOrFail($event);
 
         $request->merge([
             'member_id' => auth()->id(),
         ]);
 
-        return app(EventController::class)->join($request, $event);
+        return app(EventController::class)->join($request, $eventModel);
     })->name('join');
 });

@@ -59,19 +59,20 @@
 
                 <div>
                     <label for="num_guests" class="mb-1.5 block text-sm font-medium text-gray-700">Number of Guests</label>
-                    <input type="number" name="num_guests" id="num_guests" value="{{ old('num_guests', 1) }}" min="1" required class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                    <input type="number" name="num_guests" id="num_guests" value="{{ old('num_guests', 1) }}" min="1" required readonly class="block w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2.5 text-sm text-gray-600 cursor-not-allowed">
+                    <p class="mt-1 text-xs text-gray-500">Automatically set to Max Participants.</p>
                 </div>
 
                 <div>
-                    <label for="table_id" class="mb-1.5 block text-sm font-medium text-gray-700">Table</label>
-                    <select name="table_id" id="table_id" required class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
-                        <option value="" disabled {{ old('table_id') ? '' : 'selected' }}>Select a table</option>
+                    <label for="table_id" class="mb-1.5 block text-sm font-medium text-gray-700">Table(s)</label>
+                    <select name="table_id[]" id="table_id" multiple required size="5" class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                         @foreach($tables as $table)
-                            <option value="{{ $table->table_id }}" {{ (string) old('table_id') === (string) $table->table_id ? 'selected' : '' }}>
+                            <option value="{{ $table->table_id }}" {{ in_array((string) $table->table_id, (array) old('table_id', [])) ? 'selected' : '' }}>
                                 {{ $table->name }} (Capacity: {{ $table->capacity }})
                             </option>
                         @endforeach
                     </select>
+                    <p class="mt-1 text-xs text-gray-500">Hold Ctrl / Cmd to select multiple tables.</p>
                 </div>
 
                 <div>
@@ -102,19 +103,21 @@
             const bookedUrl     = '{{ route('api.booked-slots') }}';
 
             async function refreshSlots() {
-                const tableId = tableSelect.value;
-                const raw     = dateInput.value;          // datetime-local: "2026-04-17T14:00"
-                if (!tableId || !raw) return;
+                const selectedTables = Array.from(tableSelect.selectedOptions).map(o => o.value);
+                const raw = dateInput.value;
+                if (!selectedTables.length || !raw) return;
 
-                const date = raw.split('T')[0];           // take only the date part
+                const date = raw.split('T')[0];
 
-                let booked = [];
-                try {
-                    const res = await fetch(`${bookedUrl}?table_id=${encodeURIComponent(tableId)}&date=${encodeURIComponent(date)}`);
-                    booked = await res.json();
-                } catch (_) {}
-
-                const bookedSet = new Set(booked.map(String));
+                // Fetch booked slots for ALL selected tables, mark slot taken if booked on any
+                let bookedSet = new Set();
+                await Promise.all(selectedTables.map(async tableId => {
+                    try {
+                        const res = await fetch(`${bookedUrl}?table_id=${encodeURIComponent(tableId)}&date=${encodeURIComponent(date)}`);
+                        const data = await res.json();
+                        data.forEach(id => bookedSet.add(String(id)));
+                    } catch (_) {}
+                }));
 
                 Array.from(slotSelect.options).forEach(opt => {
                     const taken = bookedSet.has(opt.value);
@@ -127,6 +130,15 @@
             tableSelect.addEventListener('change', refreshSlots);
             dateInput.addEventListener('change', refreshSlots);
             refreshSlots();
+        })();
+
+        // Sync num_guests to max_participants
+        (function () {
+            const maxInput    = document.getElementById('max_participants');
+            const guestsInput = document.getElementById('num_guests');
+            const sync = () => { guestsInput.value = maxInput.value || 1; };
+            maxInput.addEventListener('input', sync);
+            sync();
         })();
     </script>
 </body>

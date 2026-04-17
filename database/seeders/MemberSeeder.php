@@ -16,34 +16,42 @@ class MemberSeeder extends Seeder
      */
     public function run(): void
     {
-        Member::create([
+        Member::updateOrCreate(['email' => 'admin@example.com'], [
+            'first_name' => 'Admin',
+            'last_name' => 'User',
+            'address' => '1 Admin Plaza, Springfield',
+            'phone' => '555-0100',
+            'password_hash' => Hash::make('admin123'),
+            'role' => 'admin',
+            'subscribe_events' => false,
+            'loyalty_points' => 0,
+        ]);
+
+        Member::updateOrCreate(['email' => 'john.doe@example.com'], [
             'first_name' => 'John',
             'last_name' => 'Doe',
             'address' => '123 Main St, Springfield',
             'phone' => '555-0101',
-            'email' => 'john.doe@example.com',
             'password_hash' => Hash::make('password123'),
             'subscribe_events' => true,
             'loyalty_points' => 150,
         ]);
 
-        Member::create([
+        Member::updateOrCreate(['email' => 'jane.smith@example.com'], [
             'first_name' => 'Jane',
             'last_name' => 'Smith',
             'address' => '456 Oak Ave, Springfield',
             'phone' => '555-0102',
-            'email' => 'jane.smith@example.com',
             'password_hash' => Hash::make('password123'),
             'subscribe_events' => true,
             'loyalty_points' => 300,
         ]);
 
-        Member::create([
+        Member::updateOrCreate(['email' => 'bob.johnson@example.com'], [
             'first_name' => 'Bob',
             'last_name' => 'Johnson',
             'address' => '789 Pine Rd, Springfield',
             'phone' => '555-0103',
-            'email' => 'bob.johnson@example.com',
             'password_hash' => Hash::make('password123'),
             'subscribe_events' => false,
             'loyalty_points' => 75,
