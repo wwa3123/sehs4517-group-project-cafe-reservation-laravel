@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reservations</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50 text-gray-900 min-h-screen">
+@extends('layouts.app')
+@section('title', 'Reservations')
+@section('content')
     <main class="max-w-6xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">All Reservations</h1>
@@ -90,5 +84,4 @@
             </div>
         </div>
     </main>
-</body>
-</html>
+@endsection

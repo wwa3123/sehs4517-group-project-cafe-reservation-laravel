@@ -1,39 +1,22 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reservation History · Chit-Chat Café</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #f0f7ee;
-            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
-            color: #1e2a1c;
-            padding: 40px 24px;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+﻿@extends('layouts.app')
+@section('title', 'Reservation History')
+@push('head')
+<style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         .history-card {
             max-width: 1000px;
             width: 100%;
-            background-color: #ffffff;
+            background-color: var(--card-bg, #ffffff);
             border-radius: 40px;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
             padding: 36px 32px 48px;
-            border: 1px solid #ddebe0;
+            border: 1px solid var(--border, #ddebe0);
             transition: all 0.25s ease;
+            margin: 2rem auto;
         }
 
-        .header {
+        .history-card .header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
@@ -43,138 +26,104 @@
             padding-bottom: 16px;
         }
 
-        .header h2 {
+        .history-card .header h2 {
             font-size: 1.8rem;
             font-weight: 700;
-            background: linear-gradient(135deg, #4c9f2f 0%, #7ac74f 100%);
+            background: linear-gradient(135deg, var(--accent, #4c9f2f) 0%, #7ac74f 100%);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
             letter-spacing: -0.3px;
         }
 
-        .logout-link {
-            background-color: #4c9f2f;
-            color: white;
-            text-decoration: none;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            transition: all 0.25s ease;
-            display: inline-block;
+        .history-card .table-wrapper { overflow-x: auto; margin-top: 20px; }
+
+        .history-card table {
+            width: 100%; border-collapse: collapse;
+            border-radius: 24px; overflow: hidden;
         }
 
-        .logout-link:hover {
-            background-color: #3b7e24;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(76, 159, 47, 0.2);
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-            margin-top: 20px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
-        }
-
-        th {
-            background-color: #e9f5e3;
+        .history-card th {
+            background-color: var(--accent-tint, #e9f5e3);
             color: #2c5e1e;
             font-weight: 700;
             padding: 14px 12px;
             font-size: 0.95rem;
-            letter-spacing: 0.3px;
         }
 
-        td {
+        .history-card td {
             padding: 12px;
-            border-bottom: 1px solid #e2ecd9;
-            color: #2a3a26;
+            border-bottom: 1px solid var(--border, #e2ecd9);
+            color: var(--text-primary, #2a3a26);
             font-weight: 500;
         }
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+        .history-card tr:last-child td { border-bottom: none; }
+        .history-card tr:hover td { background-color: var(--accent-tint, #f9fff7); }
 
-        tr:hover td {
-            background-color: #f9fff7;
+        .history-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .history-tab {
+            padding: 8px 22px; border-radius: 40px; font-size: 0.9rem; font-weight: 600;
+            border: 2px solid var(--border, #ddebe0); cursor: pointer;
+            background: transparent; color: var(--text-muted, #6b7c68); transition: all 0.2s;
         }
+        .history-tab.active {
+            background: var(--accent, #4c9f2f); border-color: var(--accent, #4c9f2f);
+            color: #fff;
+        }
+        .history-tab-panel { display: none; }
+        .history-tab-panel.active { display: block; }
 
-        .empty-message {
-            text-align: center;
-            padding: 48px 20px;
-            color: #6b7c68;
+        .badge {
+            display: inline-block; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 10px; border-radius: 20px;
+        }
+        .badge-upcoming { background: #e9f5e3; color: #2c6e1e; }
+        .badge-past { background: #f3f4f6; color: #6b7c68; }
+
+        .history-card .empty-message {
+            text-align: center; padding: 48px 20px;
+            color: var(--text-muted, #6b7c68);
             font-size: 1rem;
-            background: #fafdf8;
-            border-radius: 28px;
-            margin-top: 20px;
+            background: var(--bg-page, #fafdf8);
+            border-radius: 28px; margin-top: 20px;
+        }
+
+        .history-card { animation: histFadeUp 0.4s ease-out; }
+        @keyframes histFadeUp {
+            from { opacity: 0; transform: translateY(15px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 650px) {
-            .history-card {
-                padding: 24px 20px 36px;
-            }
-            .header h2 {
-                font-size: 1.5rem;
-                margin-bottom: 12px;
-            }
-            .header {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-            }
-            .logout-link {
-                text-align: center;
-            }
-            th, td {
-                padding: 10px 8px;
-                font-size: 0.85rem;
-            }
+            .history-card { padding: 24px 20px 36px; }
+            .history-card .header h2 { font-size: 1.5rem; margin-bottom: 12px; }
+            .history-card .header { flex-direction: column; gap: 12px; align-items: stretch; }
+            .history-card th, .history-card td { padding: 10px 8px; font-size: 0.85rem; }
         }
+</style>
+@endpush
+@section('content')
+<div class="history-card">
+    <div class="header">
+        <h2>My Reservation History</h2>
+    </div>
 
-        .history-card {
-            animation: fadeSlideUp 0.4s ease-out;
-        }
+    <div class="history-tabs">
+        <button class="history-tab active" data-tab="upcoming">Upcoming <span class="badge badge-upcoming">{{ $upcoming->total() }}</span></button>
+        <button class="history-tab" data-tab="past">Past <span class="badge badge-past">{{ $past->total() }}</span></button>
+    </div>
 
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="history-card">
-        <div class="header">
-            <h2>My Reservation History</h2>
-            <a href="/logout" class="logout-link">Logout</a>
-        </div>
-
+    {{-- Upcoming --}}
+    <div class="history-tab-panel active" id="tab-upcoming">
         <div class="table-wrapper">
-            @if(isset($history) && count($history) > 0)
+            @if($upcoming->count() > 0)
                 <table>
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Guests</th>
-                        </tr>
+                        <tr><th>ID</th><th>Date</th><th>Guests</th></tr>
                     </thead>
                     <tbody>
-                        @foreach($history as $item)
+                        @foreach($upcoming as $item)
                         <tr>
                             <td>{{ $item->reservation_id }}</td>
                             <td>{{ $item->date }}</td>
@@ -183,17 +132,54 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                <div class="pagination-wrapper" style="margin-top: 20px; text-align: center;">
-                    {{ $history->links() }}
+                <div class="pagination-wrapper" style="margin-top:20px;text-align:center;">
+                    {{ $upcoming->links() }}
                 </div>
-
             @else
                 <div class="empty-message">
-                    No reservations yet. <a href="/reserve" style="color:#4c9f2f;">Make your first reservation</a>
+                    No upcoming reservations. <a href="{{ route('reservations.index') }}" style="color:var(--accent,#4c9f2f);">Make a reservation</a>
                 </div>
             @endif
         </div>
     </div>
-</body>
-</html>
+
+    {{-- Past --}}
+    <div class="history-tab-panel" id="tab-past">
+        <div class="table-wrapper">
+            @if($past->count() > 0)
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Date</th><th>Guests</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($past as $item)
+                        <tr>
+                            <td>{{ $item->reservation_id }}</td>
+                            <td>{{ $item->date }}</td>
+                            <td>{{ $item->num_guests }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="pagination-wrapper" style="margin-top:20px;text-align:center;">
+                    {{ $past->links() }}
+                </div>
+            @else
+                <div class="empty-message">No past reservations.</div>
+            @endif
+        </div>
+    </div>
+</div>
+@push('scripts')
+<script>
+document.querySelectorAll('.history-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.history-tab').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.history-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+</script>
+@endpush
+@endsection

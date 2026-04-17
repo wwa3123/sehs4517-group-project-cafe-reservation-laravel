@@ -1,32 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
+@extends('layouts.app')
+@section('title', 'Register')
+@push('head')
+    @vite('resources/js/validation.js')
+@endpush
+@section('content')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite(['resources/css/app.css', 'resources/js/validation.js'])
-
-    <title>Registration - Boardgame Café</title>
-</head>
-
-<body class="bg-gray-100 text-gray-900">
-    
-    <!-- Navbar 
-    <nav class="bg-white shadow-md">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-indigo-600">Boardgame Café</h1>
-
-            <div class="space-x-6 text-lg">
-                <a href="#" class="hover:text-indigo-600">Home</a>
-                <a href="#" class="hover:text-indigo-600">Menu</a>
-                <a href="#" class="hover:text-indigo-600">Reservations</a>
-                <a href="#" class="hover:text-indigo-600">Contact</a>
-            </div>
-        </div>
-    </nav> -->
-
-    <form action="/register" method="POST" id="reg" class="max-w-md mx-auto p-6 bg-white shadow-md">
+    <div class="max-w-md mx-auto px-4 py-10">
+    <form action="/register" method="POST" id="reg" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 sm:p-8">
         @csrf
         <nav class="mb-4 flex gap-4 text-blue-600">
             <a href="/">Back</a>
@@ -70,6 +50,5 @@
         Already have an account?
         <a href="/login" class="text-blue-600">Login</a>
     </form>
-</body>
-
-</html>
+    </div>
+@endsection

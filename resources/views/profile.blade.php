@@ -1,17 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    @vite(['resources/css/app.css', 'resources/js/validation.js'])
-
-    <title>Profile - Boardgame Café</title>
-</head>
-
-<body class="bg-gray-100 text-gray-900">
-    <div class="max-w-2xl mx-auto p-8 bg-white shadow rounded-lg mt-10">
+@extends('layouts.app')
+@section('title', 'Profile')
+@push('head')
+    @vite('resources/js/validation.js')
+@endpush
+@section('content')
+    <div class="max-w-2xl mx-auto px-4 py-10 sm:px-6">
         @if (session()->has('success'))
             <h1 class="text-3xl font-bold mb-6 pb-2">
                 {{ session('success') }}
@@ -124,6 +117,13 @@
             </form>
         @endif
     </div>
-</body>
 
-</html>
+    <div class="max-w-2xl mx-auto px-4 pb-10 sm:px-6">
+        <div class="border-t pt-6 mt-2">
+            <h2 class="text-lg font-semibold mb-3">Quick Links</h2>
+            <a href="{{ route('reservation.history') }}" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-300 text-sm font-medium hover:bg-gray-50 transition-colors">
+                📋 My Reservation History
+            </a>
+        </div>
+    </div>
+@endsection

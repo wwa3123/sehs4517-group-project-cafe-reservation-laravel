@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Create Reservation</title>
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="bg-gray-50 text-gray-900 min-h-screen">
+@extends('layouts.app')
+@section('title', 'Create Reservation')
+@section('content')
     <main class="max-w-3xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 sm:p-8">
             <div class="mb-8 flex items-center justify-between gap-4">
@@ -135,13 +129,6 @@
                     </div>
                 </div>
 
-                {{-- Recommended games section --}}
-                <div id="recommended-games" class="hidden rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                    <h3 class="text-sm font-semibold text-emerald-800 mb-2">🎲 Recommended Games for This Table</h3>
-                    <div id="games-list" class="flex flex-wrap gap-2"></div>
-                    <p id="no-games-msg" class="text-xs text-emerald-700 hidden">No specific game recommendations for this table size.</p>
-                </div>
-
                 <div>
                     <label for="time_slots_id" class="mb-1.5 block text-sm font-medium text-gray-700">Time Slot(s)</label>
                     <p class="mb-2 text-xs text-gray-500">Hold Ctrl (Windows) or Cmd (Mac) to select multiple slots.</p>
@@ -191,6 +178,8 @@
             </form>
         </div>
     </main>
+@endsection
+@push('scripts')
     <script>
         // ── Games data from server ──────────────────────────────────────────
         const allGames = {!! json_encode($games->map(fn($g) => [
@@ -301,34 +290,13 @@
             });
         })();
 
-        // ── Recommended games + slot refresh ────────────────────────────────
+        // ── Slot refresh ────────────────────────────────
         const tableCards  = document.querySelectorAll('.table-card');
         const slotSelect  = document.getElementById('time_slots_id');
         const dateInput   = document.getElementById('date');
         const bookedUrl   = '{{ route('api.booked-slots') }}';
-        const recSection  = document.getElementById('recommended-games');
-        const gamesList   = document.getElementById('games-list');
-        const noGamesMsg  = document.getElementById('no-games-msg');
 
-        let selectedTableCapacity = null;
-        let selectedTableId       = null;
-
-        function showRecommendedGames(capacity) {
-            const matched = allGames.filter(g => g.min_players <= capacity && g.max_players >= capacity);
-            gamesList.innerHTML = '';
-            if (matched.length) {
-                noGamesMsg.classList.add('hidden');
-                matched.forEach(g => {
-                    const chip = document.createElement('span');
-                    chip.className = 'rounded-full bg-emerald-100 px-3 py-1 text-xs font-medium text-emerald-800';
-                    chip.textContent = `${g.title} (${g.min_players}–${g.max_players} players)`;
-                    gamesList.appendChild(chip);
-                });
-            } else {
-                noGamesMsg.classList.remove('hidden');
-            }
-            recSection.classList.remove('hidden');
-        }
+        let selectedTableId = null;
 
         async function refreshSlots() {
             if (!selectedTableId || !dateInput.value) return;
@@ -348,9 +316,7 @@
 
         tableCards.forEach(card => {
             card.addEventListener('click', () => {
-                selectedTableId       = card.dataset.tableId;
-                selectedTableCapacity = parseInt(card.dataset.capacity, 10);
-                showRecommendedGames(selectedTableCapacity);
+                selectedTableId = card.dataset.tableId;
                 refreshSlots();
             });
         });
@@ -358,14 +324,10 @@
         // trigger for pre-selected table (after validation errors)
         const preSelected = document.querySelector('.table-card input[type=radio]:checked');
         if (preSelected) {
-            const card = preSelected.closest('.table-card');
-            selectedTableId       = card.dataset.tableId;
-            selectedTableCapacity = parseInt(card.dataset.capacity, 10);
-            showRecommendedGames(selectedTableCapacity);
+            selectedTableId = preSelected.closest('.table-card').dataset.tableId;
             refreshSlots();
         }
 
         dateInput.addEventListener('change', refreshSlots);
     </script>
-</body>
-</html>
+@endpush

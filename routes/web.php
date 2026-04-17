@@ -9,8 +9,8 @@ use App\Http\Controllers\EventController;
 use App\Models\ReservedSlot;
 
 Route::get('/', function () {
-    return view('welcome');
-});
+    return view('intro');
+})->name('home');
 
 Route::get('/tailwind', function () {
     return view('tailwindTest');
@@ -37,24 +37,14 @@ require __DIR__.'/web_login_and_history.php';
 
 // Reservation thank you page
 Route::get('/reservation/thankyou', function () {
-
-//fetch some popular games from database
-$popularGames = \App\Models\Game::inRandomOrder()->limit(3)->get(['title'])->pluck('title')->toArray();
-
-
-//if no games in database yet, use fallback
-if (empty($popularGames)) {
-    $popularGames = ['Catan', 'Ticket to Ride', 'Codenames'];
-}
-
-    // In a real app, this would come from a session or database
     return view('reservation-thankyou', [
-        'email' => session('email', 'guest@example.com'),
-        'date' => session('date', 'April 16, 2026'),
-        'timeSlot' => session('timeSlot', '2:00 PM - 4:00 PM'),
-        'table' => session('table', 'Gaming Table 1'),
-        'showQrCode' => false, // Set to true to show QR code
-        'gameSuggestions' => $popularGames, // Optional game suggestions
+        'email'           => session('email', ''),
+        'date'            => session('date', ''),
+        'timeSlot'        => session('timeSlot', ''),
+        'table'           => session('table', ''),
+        'earnedTokens'    => session('earnedTokens', 0),
+        'discountApplied' => session('discountApplied', 0),
+        'gameSuggestions' => session('gameSuggestions', []),
     ]);
 })->name('reservation.thankyou');
 // Returns booked time_slot IDs for a given table + date (used by JS in create forms)
@@ -71,11 +61,13 @@ Route::get('/api/booked-slots', function (Request $request) {
     return response()->json($booked);
 })->middleware(['auth'])->name('api.booked-slots');
 
-Route::prefix('events')->name('events.')->middleware(['auth'])->group(function () {
+Route::prefix('events')->name('events.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
+    Route::get('/{event}', [EventController::class, 'show'])->name('show');
+
+    Route::middleware(['auth'])->group(function () {
     Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
     Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
-    Route::get('/{event}', [EventController::class, 'show'])->name('show');
     Route::post('/{event}/join', function (Request $request, $event) {
         abort_unless(auth()->check(), 403);
 
@@ -87,4 +79,5 @@ Route::prefix('events')->name('events.')->middleware(['auth'])->group(function (
 
         return app(EventController::class)->join($request, $eventModel);
     })->name('join');
-});
+    }); // end auth
+}); // end events prefix

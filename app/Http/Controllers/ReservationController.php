@@ -95,16 +95,31 @@ class ReservationController extends Controller
             }
         }
 
-        $successMessage = "Reservation created successfully.";
-
         $reservation->member->refresh();
-        $successMessage .= " Earned {$earnedTokens} loyalty tokens.";
-        if ($discountApplied > 0) {
-            $successMessage .= " Redeemed {$tokensToSpend} tokens for a \$" . number_format($discountApplied, 2) . " discount.";
-        }
-        $successMessage .= " Current balance: {$reservation->member->loyalty_points}.";
 
-        return redirect()->route('reservations.index')->with('success', $successMessage);
+        $member     = $reservation->member;
+        $timeSlots  = $reservation->reservedSlots->load('timeSlot');
+        $firstSlot  = optional($timeSlots->first())->timeSlot;
+        $table      = optional($reservation->reservedSlots->first())->table ?? $reservation->table;
+
+        $timeLabel = $firstSlot
+            ? Carbon::parse($firstSlot->start_time)->format('g:i A') . ' – ' . Carbon::parse($firstSlot->end_time)->format('g:i A')
+            : 'N/A';
+
+        $popularGames = \App\Models\Game::inRandomOrder()->limit(3)->get('title')->pluck('title')->toArray();
+        if (empty($popularGames)) {
+            $popularGames = ['Catan', 'Ticket to Ride', 'Codenames'];
+        }
+
+        return redirect()->route('reservation.thankyou')->with([
+            'email'          => $member->email,
+            'date'           => Carbon::parse($reservation->date)->format('F j, Y'),
+            'timeSlot'       => $timeLabel,
+            'table'          => optional($table)->table_name ?? 'Table',
+            'earnedTokens'   => $earnedTokens,
+            'discountApplied'=> $discountApplied,
+            'gameSuggestions'=> $popularGames,
+        ]);
     }
 
     public function show(Reservation $reservation)

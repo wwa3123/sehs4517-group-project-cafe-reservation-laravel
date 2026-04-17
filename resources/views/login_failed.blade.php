@@ -1,53 +1,31 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Login Failed · Chit-Chat Café</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background-color: #f0f7ee;
-            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, 'Inter', sans-serif;
-            color: #1e2a1c;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 24px 20px;
-        }
-
+@extends('layouts.app')
+@section('title', 'Login Failed')
+@push('head')
+<style>
         .error-card {
             max-width: 500px;
             width: 100%;
-            background-color: #ffffff;
+            background-color: var(--card-bg, #ffffff);
             border-radius: 40px;
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.05), 0 4px 8px rgba(0, 0, 0, 0.02);
             padding: 48px 36px 52px;
-            border: 1px solid #ddebe0;
+            border: 1px solid var(--border, #ddebe0);
             text-align: center;
+            animation: errFadeUp 0.5s ease-out;
         }
 
-        .brand h1 {
+        .error-card .brand h1 {
             font-size: 2.5rem;
             font-weight: 700;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #4c9f2f 0%, #7ac74f 100%);
+            background: linear-gradient(135deg, var(--accent, #4c9f2f) 0%, #7ac74f 100%);
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
             margin-bottom: 16px;
         }
 
-        .error-icon {
-            font-size: 4rem;
-            margin-bottom: 20px;
-        }
+        .error-icon { font-size: 4rem; margin-bottom: 20px; }
 
         .error-title {
             font-size: 1.8rem;
@@ -68,7 +46,7 @@
 
         .back-btn {
             display: inline-block;
-            background-color: #4c9f2f;
+            background-color: var(--accent, #4c9f2f);
             border: none;
             border-radius: 40px;
             padding: 14px 32px;
@@ -82,29 +60,19 @@
         }
 
         .back-btn:hover {
-            background-color: #3b7e24;
+            background-color: var(--accent-dark, #3b7e24);
             transform: translateY(-2px);
             box-shadow: 0 8px 18px rgba(76, 159, 47, 0.25);
         }
 
-
-        @keyframes fadeSlideUp {
-            from {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes errFadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-
-        .error-card {
-            animation: fadeSlideUp 0.5s ease-out;
-        }
-    </style>
-</head>
-<body>
+</style>
+@endpush
+@section('content')
+<div class="flex justify-center py-16 px-6">
     <div class="error-card">
         <div class="brand">
             <h1>Chit-Chat Café</h1>
@@ -116,5 +84,5 @@
         </div>
         <a href="/login" class="back-btn">Back to Login</a>
     </div>
-</body>
-</html>
+</div>
+@endsection

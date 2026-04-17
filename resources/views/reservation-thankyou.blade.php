@@ -1,64 +1,7 @@
-<!DOCTYPE html>
-<html lang="en" id="html">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Reservation Confirmed - Game Cafe</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />
-
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Instrument Sans', 'system-ui', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
-
-    <style>
-        body {
-            font-family: 'Instrument Sans', system-ui, sans-serif;
-            transition: background-color 0.4s ease;
-        }
-
-        .theme-toggle {
-            position: fixed;
-            top: 24px;
-            right: 24px;
-            width: 52px;
-            height: 52px;
-            font-size: 1.8rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            z-index: 100;
-            transition: all 0.3s;
-        }
-
-        .dark .theme-toggle {
-            background: #1f2937;
-            border-color: #4b5563;
-            color: white;
-        }
-    </style>
-</head>
-
-<body class="bg-[#F8F9F7] dark:bg-[#0A0C14] min-h-screen flex items-center justify-center p-6">
-
-    <!-- Theme Toggle -->
-    <button id="themeToggle" class="theme-toggle">☀️</button>
-
+@extends('layouts.app')
+@section('title', 'Reservation Confirmed')
+@section('content')
+<div class="flex justify-center py-10 px-6">
     <div class="max-w-lg w-full">
 
         <div class="bg-white dark:bg-[#111827] rounded-3xl shadow-2xl p-8 border border-gray-100 dark:border-gray-700">
@@ -106,6 +49,41 @@
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-4">Scan for reservation details</p>
             </div>
 
+            <!-- Loyalty Summary -->
+            @if(($earnedTokens ?? 0) > 0 || ($discountApplied ?? 0) > 0)
+            <div class="bg-gray-50 rounded-2xl p-5 border border-gray-200 text-sm space-y-1">
+                <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-widest mb-3">Loyalty Summary</h3>
+                @if(($earnedTokens ?? 0) > 0)
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Tokens Earned</span>
+                    <span class="font-semibold text-emerald-600">+{{ $earnedTokens }}</span>
+                </div>
+                @endif
+                @if(($discountApplied ?? 0) > 0)
+                <div class="flex justify-between">
+                    <span class="text-gray-500">Discount Applied</span>
+                    <span class="font-semibold text-emerald-600">-${{ number_format($discountApplied, 2) }}</span>
+                </div>
+                @endif
+            </div>
+            @endif
+
+            <!-- Popular Games -->
+            @if(!empty($gameSuggestions))
+            <div class="bg-gray-50 rounded-2xl p-6 border border-gray-200">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-widest mb-5 text-center">
+                    Popular Games Available
+                </h3>
+                <div class="flex flex-wrap gap-3 justify-center">
+                    @foreach($gameSuggestions as $game)
+                        <span class="px-5 py-2.5 bg-white text-sm font-medium rounded-full border border-gray-200">
+                            {{ $game }}
+                        </span>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <!-- OK Button -->
             <div class="mt-8 flex justify-center">
                 <a href="/" class="px-16 py-4 bg-gray-900 hover:bg-black dark:bg-white dark:text-gray-900 rounded-2xl text-white font-semibold transition">
@@ -115,31 +93,5 @@
 
         </div>
     </div>
-
-    <script>
-        const toggleBtn = document.getElementById('themeToggle');
-        const html = document.getElementById('html');
-
-        function setTheme(isDark) {
-            if (isDark) {
-                html.classList.add('dark');
-                toggleBtn.textContent = '🌙';
-            } else {
-                html.classList.remove('dark');
-                toggleBtn.textContent = '☀️';
-            }
-            localStorage.setItem('theme', isDark ? 'dark' : 'light');
-        }
-
-        // Initialize theme
-        const savedTheme = localStorage.getItem('theme');
-        setTheme(savedTheme === 'dark');
-
-        // Toggle
-        toggleBtn.addEventListener('click', () => {
-            const isCurrentlyDark = html.classList.contains('dark');
-            setTheme(!isCurrentlyDark);
-        });
-    </script>
-</body>
-</html>
+</div>
+@endsection

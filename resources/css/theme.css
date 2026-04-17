@@ -1,0 +1,209 @@
+/* ===================================================
+   APP THEME  –  Green colour scheme, dark-mode aware
+   Applies to all pages that use layouts/app.blade.php
+   (body.app-page)
+   =================================================== */
+
+/* ---- Light-mode variables ---- */
+body.app-page {
+    --bg-page:        #f0f7ee;
+    --card-bg:        #ffffff;
+    --text-primary:   #1e2a1c;
+    --text-secondary: #3a5a34;
+    --text-muted:     #6b7c68;
+    --border:         #ddebe0;
+    --accent:         #4c9f2f;
+    --accent-dark:    #3b7e24;
+    --accent-tint:    #e9f5e3;
+    --shadow:         0 1px 3px rgba(0,0,0,.07), 0 1px 2px rgba(0,0,0,.04);
+    --transition:     all 0.25s ease;
+
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+    transition: background-color 0.3s ease, color 0.2s ease;
+}
+
+/* ---- Dark-mode variables ---- */
+body.app-page.dark {
+    --bg-page:        #121212;
+    --card-bg:        #1a2a18;
+    --text-primary:   #eef5ea;
+    --text-secondary: #cfe3c7;
+    --text-muted:     #a1b89a;
+    --border:         #2c3e28;
+    --accent:         #7ed957;
+    --accent-dark:    #5fb03e;
+    --accent-tint:    #1e3019;
+    --shadow:         0 1px 3px rgba(0,0,0,.5);
+}
+
+/* ---- Dark-mode toggle button ---- */
+.app-page .theme-toggle {
+    position: fixed;
+    top: 14px;
+    right: 18px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background-color: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 1.1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    z-index: 300;
+}
+.app-page .theme-toggle:hover {
+    transform: scale(1.1);
+    background-color: var(--accent-tint);
+    border-color: var(--accent);
+}
+
+/* ---- Navigation ---- */
+.app-nav {
+    background-color: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    transition: background-color 0.3s ease;
+}
+.app-nav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1.25rem;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.app-brand {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--accent) 0%, #7ac74f 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+}
+.app-nav-links {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 48px; /* room for the fixed toggle button */
+}
+.app-nav-link {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    padding: 0.35rem 0.7rem;
+    border-radius: 8px;
+    transition: var(--transition);
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+.app-nav-link:hover,
+.app-nav-link.active {
+    background-color: var(--accent-tint);
+    color: var(--accent);
+}
+
+/* ---- Page content wrapper ---- */
+.app-content {
+    /* views control their own max-width / padding via Tailwind */
+}
+
+/* ================================================================
+   DARK-MODE OVERRIDES FOR TAILWIND UTILITY CLASSES
+   These target the most common Tailwind classes used across views.
+   ================================================================ */
+
+/* Backgrounds */
+body.app-page.dark .bg-white          { background-color: var(--card-bg)  !important; }
+body.app-page.dark .bg-gray-50        { background-color: #192818          !important; }
+body.app-page.dark .bg-gray-100       { background-color: #1e2a1c          !important; }
+body.app-page.dark .bg-gray-200       { background-color: #253723          !important; }
+
+/* Hover backgrounds */
+body.app-page.dark .hover\:bg-gray-50:hover  { background-color: #1e2a1c !important; }
+body.app-page.dark .hover\:bg-gray-100:hover { background-color: #253723 !important; }
+
+/* Text */
+body.app-page.dark .text-gray-900 { color: var(--text-primary)   !important; }
+body.app-page.dark .text-gray-800 { color: #d4edcc                !important; }
+body.app-page.dark .text-gray-700 { color: var(--text-secondary)  !important; }
+body.app-page.dark .text-gray-600 { color: #b0cca8                !important; }
+body.app-page.dark .text-gray-500 { color: var(--text-muted)      !important; }
+
+/* Borders */
+body.app-page.dark .border-gray-200  { border-color: var(--border) !important; }
+body.app-page.dark .border-gray-300  { border-color: #334a2f       !important; }
+body.app-page.dark .border-gray-100  { border-color: #243322       !important; }
+
+/* Dividers */
+body.app-page.dark .divide-gray-200 > * + * { border-color: var(--border) !important; }
+body.app-page.dark .divide-gray-100 > * + * { border-color: #243322       !important; }
+
+/* Indigo → Green (primary action buttons & highlights) */
+body.app-page .bg-indigo-600,
+body.app-page.dark .bg-indigo-600       { background-color: var(--accent)      !important; }
+body.app-page .hover\:bg-indigo-700:hover,
+body.app-page.dark .hover\:bg-indigo-700:hover { background-color: var(--accent-dark) !important; }
+body.app-page .focus\:ring-indigo-500:focus,
+body.app-page.dark .focus\:ring-indigo-500:focus { --tw-ring-color: var(--accent)      !important; }
+body.app-page .focus\:border-indigo-500:focus,
+body.app-page.dark .focus\:border-indigo-500:focus { border-color: var(--accent)        !important; }
+
+body.app-page.dark .text-indigo-600,
+body.app-page.dark .text-indigo-700  { color: var(--accent)      !important; }
+body.app-page.dark .bg-indigo-50     { background-color: var(--accent-tint) !important; }
+body.app-page.dark .border-indigo-200 { border-color: var(--border)         !important; }
+
+/* Emerald / success (keep readable in dark) */
+body.app-page.dark .bg-emerald-50      { background-color: #1a2a18 !important; }
+body.app-page.dark .border-emerald-200 { border-color: #2c3e28    !important; }
+body.app-page.dark .text-emerald-700   { color: var(--accent)     !important; }
+
+/* Green pills/badges */
+body.app-page.dark .bg-green-100  { background-color: #1e3019 !important; }
+body.app-page.dark .text-green-700 { color: var(--accent)     !important; }
+
+/* Red / error */
+body.app-page.dark .bg-red-50       { background-color: #2a1a1a !important; }
+body.app-page.dark .border-red-200  { border-color: #4a2020    !important; }
+body.app-page.dark .text-red-700,
+body.app-page.dark .text-red-500    { color: #f87171            !important; }
+
+/* Form elements */
+body.app-page.dark input:not([type=checkbox]):not([type=radio]),
+body.app-page.dark select,
+body.app-page.dark textarea {
+    background-color: #1e2a1c !important;
+    border-color: var(--border) !important;
+    color: var(--text-primary) !important;
+}
+body.app-page.dark input:focus,
+body.app-page.dark select:focus,
+body.app-page.dark textarea:focus {
+    border-color: var(--accent) !important;
+    outline-color: var(--accent) !important;
+}
+body.app-page.dark input[readonly],
+body.app-page.dark input.cursor-not-allowed {
+    background-color: #243322 !important;
+    color: var(--text-muted)  !important;
+}
+
+/* Labels */
+body.app-page.dark label { color: var(--text-secondary); }
+
+/* "Back" / outline buttons */
+body.app-page.dark .border-gray-300 { border-color: #334a2f !important; }
