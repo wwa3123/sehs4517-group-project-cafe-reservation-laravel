@@ -12,12 +12,14 @@ class HistoryController extends Controller
         $memberId = Auth::id();
         $today = now()->toDateString();
 
-        $upcoming = Reservation::where('member_id', $memberId)
+        $upcoming = Reservation::with('reservedSlots.table', 'reservedSlots.timeSlot')
+            ->where('member_id', $memberId)
             ->where('date', '>=', $today)
             ->orderBy('date')
             ->paginate(10, ['*'], 'upcoming_page');
 
-        $past = Reservation::where('member_id', $memberId)
+        $past = Reservation::with('reservedSlots.table', 'reservedSlots.timeSlot')
+            ->where('member_id', $memberId)
             ->where('date', '<', $today)
             ->orderByDesc('date')
             ->paginate(10, ['*'], 'past_page');

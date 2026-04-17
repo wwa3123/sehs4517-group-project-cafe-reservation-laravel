@@ -42,7 +42,7 @@
                     <dd class="mt-1 text-sm text-gray-700">
                         @if($reservation->discount_tokens_used > 0)
                             <span class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-1 text-xs font-medium text-green-700">
-                                {{ $reservation->discount_tokens_used }} tokens (${!! number_format($reservation->discount_amount_saved, 2) }})
+                                {{ $reservation->discount_tokens_used }} tokens (${{ number_format($reservation->discount_amount_saved, 2) }})
                             </span>
                         @else
                             <span class="text-gray-500">None</span>
@@ -67,6 +67,7 @@
                     @endforelse
                 </ul>
             </section>
+
         </div>
     </main>
 @endsection

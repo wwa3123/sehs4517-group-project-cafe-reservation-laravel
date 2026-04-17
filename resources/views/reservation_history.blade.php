@@ -120,14 +120,21 @@
             @if($upcoming->count() > 0)
                 <table>
                     <thead>
-                        <tr><th>ID</th><th>Date</th><th>Guests</th></tr>
+                        <tr><th>#</th><th>Date</th><th>Table</th><th>Time Slot(s)</th><th>Guests</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach($upcoming as $item)
                         <tr>
                             <td>{{ $item->reservation_id }}</td>
-                            <td>{{ $item->date }}</td>
+                            <td>{{ \Carbon\Carbon::parse($item->date)->format('M j, Y') }}</td>
+                            <td>{{ optional($item->reservedSlots->first()?->table)->name ?? '—' }}</td>
+                            <td>
+                                @foreach($item->reservedSlots->sortBy('timeSlot.start_time') as $slot)
+                                    <div style="white-space:nowrap;">{{ \Carbon\Carbon::parse($slot->timeSlot->start_time)->format('g:i A') }}–{{ \Carbon\Carbon::parse($slot->timeSlot->end_time)->format('g:i A') }}</div>
+                                @endforeach
+                            </td>
                             <td>{{ $item->num_guests }}</td>
+                            <td><a href="{{ route('reservations.show', $item->reservation_id) }}" style="color:var(--accent,#4c9f2f);font-weight:600;white-space:nowrap;">View →</a></td>
                         </tr>
                         @endforeach
                     </tbody>
@@ -149,14 +156,21 @@
             @if($past->count() > 0)
                 <table>
                     <thead>
-                        <tr><th>ID</th><th>Date</th><th>Guests</th></tr>
+                        <tr><th>#</th><th>Date</th><th>Table</th><th>Time Slot(s)</th><th>Guests</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach($past as $item)
                         <tr>
                             <td>{{ $item->reservation_id }}</td>
-                            <td>{{ $item->date }}</td>
+                            <td>{{ \Carbon\Carbon::parse($item->date)->format('M j, Y') }}</td>
+                            <td>{{ optional($item->reservedSlots->first()?->table)->name ?? '—' }}</td>
+                            <td>
+                                @foreach($item->reservedSlots->sortBy('timeSlot.start_time') as $slot)
+                                    <div style="white-space:nowrap;">{{ \Carbon\Carbon::parse($slot->timeSlot->start_time)->format('g:i A') }}–{{ \Carbon\Carbon::parse($slot->timeSlot->end_time)->format('g:i A') }}</div>
+                                @endforeach
+                            </td>
                             <td>{{ $item->num_guests }}</td>
+                            <td><a href="{{ route('reservations.show', $item->reservation_id) }}" style="color:var(--accent,#4c9f2f);font-weight:600;white-space:nowrap;">View →</a></td>
                         </tr>
                         @endforeach
                     </tbody>

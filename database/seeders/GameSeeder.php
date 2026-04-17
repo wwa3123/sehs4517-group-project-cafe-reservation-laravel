@@ -21,7 +21,7 @@ class GameSeeder extends Seeder
             'min_players' => 2,
             'max_players' => 4,
             'description' => 'Build and trade to become the dominant force on the island of Catan.',
-            'photo_url' => 'https://example.com/catan.jpg',
+            'photo_url' => 'images/games/catan.jpg',
         ]);
 
         Game::create([
@@ -30,7 +30,7 @@ class GameSeeder extends Seeder
             'min_players' => 2,
             'max_players' => 5,
             'description' => 'Claim railway routes across the continent.',
-            'photo_url' => 'https://example.com/ttr.jpg',
+            'photo_url' => 'images/games/ttr.jpg',
         ]);
 
         Game::create([
@@ -39,7 +39,7 @@ class GameSeeder extends Seeder
             'min_players' => 2,
             'max_players' => 5,
             'description' => 'Build the medieval landscape of southern France.',
-            'photo_url' => 'https://example.com/carcassonne.jpg',
+            'photo_url' => 'images/games/carcassonne.jpg',
         ]);
 
         Game::create([
@@ -48,7 +48,7 @@ class GameSeeder extends Seeder
             'min_players' => 2,
             'max_players' => 4,
             'description' => 'A deck-building card game where you build your kingdom.',
-            'photo_url' => 'https://example.com/dominion.jpg',
+            'photo_url' => 'images/games/dominion.jpg',
         ]);
     }
 }

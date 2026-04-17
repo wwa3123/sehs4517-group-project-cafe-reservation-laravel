@@ -20,7 +20,7 @@ class MenuItemSeeder extends Seeder
             'category' => 'Coffee',
             'description' => 'Rich and bold espresso shot',
             'is_available' => true,
-            'photo_url' => 'https://example.com/espresso.jpg',
+            'photo_url' => 'images/menu/espresso.jpg',
         ]);
 
         MenuItem::create([
@@ -28,7 +28,7 @@ class MenuItemSeeder extends Seeder
             'category' => 'Coffee',
             'description' => 'Smooth cappuccino with creamy foam',
             'is_available' => true,
-            'photo_url' => 'https://example.com/cappuccino.jpg',
+            'photo_url' => 'images/menu/cappuccino.jpg',
         ]);
 
         MenuItem::create([
@@ -36,7 +36,7 @@ class MenuItemSeeder extends Seeder
             'category' => 'Pastry',
             'description' => 'Buttery French croissant',
             'is_available' => true,
-            'photo_url' => 'https://example.com/croissant.jpg',
+            'photo_url' => 'images/menu/croissant.jpg',
         ]);
 
         MenuItem::create([
@@ -44,7 +44,7 @@ class MenuItemSeeder extends Seeder
             'category' => 'Dessert',
             'description' => 'Classic homemade chocolate chip cookie',
             'is_available' => true,
-            'photo_url' => 'https://example.com/cookie.jpg',
+            'photo_url' => 'images/menu/cookie.jpg',
         ]);
     }
 }

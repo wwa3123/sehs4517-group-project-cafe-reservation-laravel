@@ -207,3 +207,34 @@ body.app-page.dark label { color: var(--text-secondary); }
 
 /* "Back" / outline buttons */
 body.app-page.dark .border-gray-300 { border-color: #334a2f !important; }
+
+/* ---- Table / token selection cards (has-[:checked] state) ---- */
+/* In dark mode the indigo tint is invisible; use accent colours instead */
+body.app-page.dark .has-\[\:checked\]\:bg-indigo-50:has(:checked)     { background-color: var(--accent-tint)  !important; }
+body.app-page.dark .has-\[\:checked\]\:border-indigo-600:has(:checked) { border-color: var(--accent)           !important; }
+body.app-page.dark .hover\:border-indigo-400:hover                     { border-color: var(--accent-dark)      !important; }
+/* Also ensure unselected card borders are visible */
+body.app-page.dark .table-card                                          { border-color: var(--border);
+                                                                          background-color: var(--card-bg); }
+body.app-page.dark .table-card:has(input:checked)                      { border-color: var(--accent) !important;
+                                                                          background-color: var(--accent-tint) !important; }
+
+/* ---- Loyalty token redemption section ---- */
+body.app-page.dark .bg-amber-50          { background-color: #251e0a !important; }
+body.app-page.dark .border-amber-200     { border-color: #5a430d    !important; }
+body.app-page.dark .bg-amber-100         { background-color: #2e2208 !important; }
+body.app-page.dark .text-amber-800       { color: #fcd98a           !important; }
+body.app-page.dark .text-amber-700       { color: #f5c842           !important; }
+body.app-page.dark .text-amber-900       { color: #ffe0a0           !important; }
+/* Token tier buttons */
+body.app-page.dark .token-tier                                { background-color: #1e1a0e;
+                                                                border-color: #5a430d; }
+body.app-page.dark .token-tier:has(input:checked)            { border-color: #d97706 !important;
+                                                                background-color: #2e2208 !important; }
+body.app-page.dark .has-\[\:checked\]\:border-amber-500:has(:checked) { border-color: #d97706 !important; }
+body.app-page.dark .has-\[\:checked\]\:bg-amber-100:has(:checked)     { background-color: #2e2208 !important; }
+/* "No redemption" token tier */
+body.app-page.dark .token-tier .text-gray-600  { color: var(--text-muted) !important; }
+body.app-page.dark .token-tier .text-gray-400  { color: #6b7c68           !important; }
+body.app-page.dark .token-tier:has(input[value="0"]):has(input:checked) { border-color: #334a2f !important;
+                                                                           background-color: var(--accent-tint) !important; }

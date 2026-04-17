@@ -67,8 +67,12 @@
                 </div>
 
                     <div class="sm:col-span-2">
-                        <label for="num_guests" class="mb-1.5 block text-sm font-medium text-gray-700">Number of Guests</label>
+                        <label for="num_guests" class="mb-1.5 block text-sm font-medium text-gray-700">
+                            Number of Guests
+                            <span id="capacity-hint" class="ml-2 text-xs font-normal text-gray-400 hidden">(max <span id="capacity-val"></span>)</span>
+                        </label>
                         <input type="number" name="num_guests" id="num_guests" value="{{ old('num_guests') }}" min="1" required class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <p id="capacity-warning" class="hidden mt-1 text-xs text-red-600">Exceeds the selected table's maximum capacity.</p>
                     </div>
                 </div>
 
@@ -105,24 +109,22 @@
                         <label data-type="{{ $table->type }}"
                                data-capacity="{{ $table->capacity }}"
                                data-table-id="{{ $table->table_id }}"
-                               class="table-card cursor-pointer rounded-xl border-2 border-gray-200 bg-white p-4 transition hover:border-indigo-400 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
+                               class="table-card cursor-pointer rounded-xl border-2 border-gray-200 bg-white overflow-hidden transition hover:border-indigo-400 has-[:checked]:border-indigo-600 has-[:checked]:bg-indigo-50">
                             <input type="radio" name="table_id" value="{{ $table->table_id }}" class="sr-only" {{ (string) old('table_id') === (string) $table->table_id ? 'checked' : '' }} required>
-                            <div class="flex items-start gap-3">
-                                @if($table->photo_url)
-                                    <img src="{{ $table->photo_url }}" alt="{{ $table->name }}" class="h-14 w-14 rounded-lg object-cover flex-shrink-0">
-                                @else
-                                    <div class="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-lg bg-gray-100 text-2xl">{{ $icon }}</div>
-                                @endif
-                                <div class="flex-1 min-w-0">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="font-medium text-sm text-gray-900">{{ $table->name }}</span>
-                                        <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeClass }}">{{ $table->type }}</span>
-                                    </div>
-                                    <p class="mt-1 text-xs text-gray-500">Max players: <span class="font-semibold text-gray-700">{{ $table->capacity }}</span></p>
-                                    @if($table->description)
-                                    <p class="mt-1 text-xs text-gray-400 truncate">{{ $table->description }}</p>
-                                    @endif
+                            @if($table->photo_url)
+                                <img src="{{ asset($table->photo_url) }}" alt="{{ $table->name }}" class="w-full h-36 object-cover">
+                            @else
+                                <div class="w-full h-36 flex items-center justify-center bg-gray-100 text-4xl">{{ $icon }}</div>
+                            @endif
+                            <div class="p-3">
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <span class="font-medium text-sm text-gray-900">{{ $table->name }}</span>
+                                    <span class="rounded-full px-2 py-0.5 text-xs font-medium {{ $badgeClass }}">{{ $table->type }}</span>
                                 </div>
+                                <p class="text-xs text-gray-500">Max players: <span class="font-semibold text-gray-700">{{ $table->capacity }}</span></p>
+                                @if($table->description)
+                                <p class="mt-1 text-xs text-gray-400 truncate">{{ $table->description }}</p>
+                                @endif
                             </div>
                         </label>
                         @endforeach
@@ -170,10 +172,18 @@
                 </div>
                 @endif
 
-                <div class="pt-2">
+                <div class="pt-2 flex flex-wrap gap-3">
                     <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                         Create Reservation
                     </button>
+                    <button type="reset" id="btn-clear"
+                            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2">
+                        Clear
+                    </button>
+                    <a href="{{ route('home') }}"
+                       class="inline-flex items-center justify-center rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-400 focus:ring-offset-2">
+                        Cancel
+                    </a>
                 </div>
             </form>
         </div>
@@ -295,8 +305,38 @@
         const slotSelect  = document.getElementById('time_slots_id');
         const dateInput   = document.getElementById('date');
         const bookedUrl   = '{{ route('api.booked-slots') }}';
+        const guestsInput  = document.getElementById('num_guests');
+        const capacityHint = document.getElementById('capacity-hint');
+        const capacityVal  = document.getElementById('capacity-val');
+        const capWarning   = document.getElementById('capacity-warning');
 
         let selectedTableId = null;
+        let selectedCapacity = null;
+
+        function updateCapacityUI(capacity) {
+            selectedCapacity = capacity;
+            if (capacity) {
+                guestsInput.max = capacity;
+                capacityVal.textContent = capacity;
+                capacityHint.classList.remove('hidden');
+            } else {
+                guestsInput.removeAttribute('max');
+                capacityHint.classList.add('hidden');
+            }
+            checkCapacity();
+        }
+
+        function checkCapacity() {
+            if (selectedCapacity && guestsInput.value && parseInt(guestsInput.value) > selectedCapacity) {
+                capWarning.classList.remove('hidden');
+                guestsInput.setCustomValidity('Exceeds table capacity of ' + selectedCapacity + '.');
+            } else {
+                capWarning.classList.add('hidden');
+                guestsInput.setCustomValidity('');
+            }
+        }
+
+        guestsInput.addEventListener('input', checkCapacity);
 
         async function refreshSlots() {
             if (!selectedTableId || !dateInput.value) return;
@@ -317,6 +357,7 @@
         tableCards.forEach(card => {
             card.addEventListener('click', () => {
                 selectedTableId = card.dataset.tableId;
+                updateCapacityUI(parseInt(card.dataset.capacity) || null);
                 refreshSlots();
             });
         });
@@ -324,10 +365,39 @@
         // trigger for pre-selected table (after validation errors)
         const preSelected = document.querySelector('.table-card input[type=radio]:checked');
         if (preSelected) {
-            selectedTableId = preSelected.closest('.table-card').dataset.tableId;
+            const preCard = preSelected.closest('.table-card');
+            selectedTableId = preCard.dataset.tableId;
+            updateCapacityUI(parseInt(preCard.dataset.capacity) || null);
             refreshSlots();
         }
 
         dateInput.addEventListener('change', refreshSlots);
+
+        // ── Clear button ────────────────────────────────────────────────────
+        document.getElementById('btn-clear').addEventListener('click', function () {
+            // Reset hidden date input & calendar
+            dateInput.value = '';
+            selected = null;
+            calLabel.classList.add('hidden');
+            render();
+
+            // Deselect all table cards
+            document.querySelectorAll('.table-card input[type=radio]').forEach(r => r.checked = false);
+            selectedTableId = null;
+            updateCapacityUI(null);
+
+            // Reset time slot selections
+            Array.from(slotSelect.options).forEach(opt => {
+                opt.selected = false;
+                opt.hidden   = false;
+                opt.disabled = false;
+            });
+
+            // Reset guests field
+            guestsInput.value = '';
+            guestsInput.removeAttribute('max');
+            capWarning.classList.add('hidden');
+            guestsInput.setCustomValidity('');
+        });
     </script>
 @endpush

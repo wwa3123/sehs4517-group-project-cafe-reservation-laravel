@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Login · Chit-Chat Café</title>
-    @vite('resources/css/login.css')
+    @vite(['resources/css/app.css', 'resources/css/login.css'])
 </head>
-<body class="login-page">
+<body class="login-page app-page">
     <!-- dark mode toggle button (🌞/🌙) -->
     <button class="theme-toggle" id="themeToggleBtn" aria-label="切換深淺主題">
         🌞
