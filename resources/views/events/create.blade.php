@@ -94,5 +94,40 @@
             </form>
         </div>
     </main>
+    <script>
+        (function () {
+            const tableSelect   = document.getElementById('table_id');
+            const dateInput     = document.getElementById('event_date');
+            const slotSelect    = document.getElementById('time_slots_id');
+            const bookedUrl     = '{{ route('api.booked-slots') }}';
+
+            async function refreshSlots() {
+                const tableId = tableSelect.value;
+                const raw     = dateInput.value;          // datetime-local: "2026-04-17T14:00"
+                if (!tableId || !raw) return;
+
+                const date = raw.split('T')[0];           // take only the date part
+
+                let booked = [];
+                try {
+                    const res = await fetch(`${bookedUrl}?table_id=${encodeURIComponent(tableId)}&date=${encodeURIComponent(date)}`);
+                    booked = await res.json();
+                } catch (_) {}
+
+                const bookedSet = new Set(booked.map(String));
+
+                Array.from(slotSelect.options).forEach(opt => {
+                    const taken = bookedSet.has(opt.value);
+                    opt.hidden   = taken;
+                    opt.disabled = taken;
+                    if (taken) opt.selected = false;
+                });
+            }
+
+            tableSelect.addEventListener('change', refreshSlots);
+            dateInput.addEventListener('change', refreshSlots);
+            refreshSlots();
+        })();
+    </script>
 </body>
 </html>

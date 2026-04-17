@@ -107,25 +107,53 @@
     </main>
     <script>
         (function () {
-            const eventSelect = document.getElementById('event_id');
-            const memberSelect = document.getElementById('member_id');
+            const eventSelect   = document.getElementById('event_id');
+            const memberSelect  = document.getElementById('member_id');
             const memberSection = document.getElementById('member-section');
 
             const syncMemberRequirement = () => {
                 const hasEvent = eventSelect && eventSelect.value !== '';
-
                 memberSelect.required = !hasEvent;
                 memberSelect.disabled = hasEvent;
-
-                if (memberSection) {
-                    memberSection.classList.toggle('opacity-60', hasEvent);
-                }
+                if (memberSection) memberSection.classList.toggle('opacity-60', hasEvent);
             };
 
             if (eventSelect && memberSelect) {
                 eventSelect.addEventListener('change', syncMemberRequirement);
                 syncMemberRequirement();
             }
+        })();
+
+        (function () {
+            const tableSelect = document.getElementById('table_id');
+            const dateInput   = document.getElementById('date');
+            const slotSelect  = document.getElementById('time_slots_id');
+            const bookedUrl   = '{{ route('api.booked-slots') }}';
+
+            async function refreshSlots() {
+                const tableId = tableSelect.value;
+                const date    = dateInput.value;       // type="date": "2026-04-17"
+                if (!tableId || !date) return;
+
+                let booked = [];
+                try {
+                    const res = await fetch(`${bookedUrl}?table_id=${encodeURIComponent(tableId)}&date=${encodeURIComponent(date)}`);
+                    booked = await res.json();
+                } catch (_) {}
+
+                const bookedSet = new Set(booked.map(String));
+
+                Array.from(slotSelect.options).forEach(opt => {
+                    const taken = bookedSet.has(opt.value);
+                    opt.hidden   = taken;
+                    opt.disabled = taken;
+                    if (taken) opt.selected = false;
+                });
+            }
+
+            tableSelect.addEventListener('change', refreshSlots);
+            dateInput.addEventListener('change', refreshSlots);
+            refreshSlots();
         })();
     </script>
 </body>
