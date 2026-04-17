@@ -61,6 +61,26 @@
         .history-card tr:last-child td { border-bottom: none; }
         .history-card tr:hover td { background-color: var(--accent-tint, #f9fff7); }
 
+        .history-tabs { display: flex; gap: 8px; margin-bottom: 24px; }
+        .history-tab {
+            padding: 8px 22px; border-radius: 40px; font-size: 0.9rem; font-weight: 600;
+            border: 2px solid var(--border, #ddebe0); cursor: pointer;
+            background: transparent; color: var(--text-muted, #6b7c68); transition: all 0.2s;
+        }
+        .history-tab.active {
+            background: var(--accent, #4c9f2f); border-color: var(--accent, #4c9f2f);
+            color: #fff;
+        }
+        .history-tab-panel { display: none; }
+        .history-tab-panel.active { display: block; }
+
+        .badge {
+            display: inline-block; font-size: 0.75rem; font-weight: 700;
+            padding: 2px 10px; border-radius: 20px;
+        }
+        .badge-upcoming { background: #e9f5e3; color: #2c6e1e; }
+        .badge-past { background: #f3f4f6; color: #6b7c68; }
+
         .history-card .empty-message {
             text-align: center; padding: 48px 20px;
             color: var(--text-muted, #6b7c68);
@@ -85,22 +105,25 @@
 @endpush
 @section('content')
 <div class="history-card">
-        <div class="header">
-            <h2>My Reservation History</h2>
-        </div>
+    <div class="header">
+        <h2>My Reservation History</h2>
+    </div>
 
+    <div class="history-tabs">
+        <button class="history-tab active" data-tab="upcoming">Upcoming <span class="badge badge-upcoming">{{ $upcoming->total() }}</span></button>
+        <button class="history-tab" data-tab="past">Past <span class="badge badge-past">{{ $past->total() }}</span></button>
+    </div>
+
+    {{-- Upcoming --}}
+    <div class="history-tab-panel active" id="tab-upcoming">
         <div class="table-wrapper">
-            @if(isset($history) && count($history) > 0)
+            @if($upcoming->count() > 0)
                 <table>
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Date</th>
-                            <th>Guests</th>
-                        </tr>
+                        <tr><th>ID</th><th>Date</th><th>Guests</th></tr>
                     </thead>
                     <tbody>
-                        @foreach($history as $item)
+                        @foreach($upcoming as $item)
                         <tr>
                             <td>{{ $item->reservation_id }}</td>
                             <td>{{ $item->date }}</td>
@@ -109,16 +132,54 @@
                         @endforeach
                     </tbody>
                 </table>
-
-                <div class="pagination-wrapper" style="margin-top: 20px; text-align: center;">
-                    {{ $history->links() }}
+                <div class="pagination-wrapper" style="margin-top:20px;text-align:center;">
+                    {{ $upcoming->links() }}
                 </div>
-
             @else
                 <div class="empty-message">
-                    No reservations yet. <a href="/reserve" style="color:#4c9f2f;">Make your first reservation</a>
+                    No upcoming reservations. <a href="{{ route('reservations.index') }}" style="color:var(--accent,#4c9f2f);">Make a reservation</a>
                 </div>
             @endif
         </div>
     </div>
+
+    {{-- Past --}}
+    <div class="history-tab-panel" id="tab-past">
+        <div class="table-wrapper">
+            @if($past->count() > 0)
+                <table>
+                    <thead>
+                        <tr><th>ID</th><th>Date</th><th>Guests</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($past as $item)
+                        <tr>
+                            <td>{{ $item->reservation_id }}</td>
+                            <td>{{ $item->date }}</td>
+                            <td>{{ $item->num_guests }}</td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+                <div class="pagination-wrapper" style="margin-top:20px;text-align:center;">
+                    {{ $past->links() }}
+                </div>
+            @else
+                <div class="empty-message">No past reservations.</div>
+            @endif
+        </div>
+    </div>
+</div>
+@push('scripts')
+<script>
+document.querySelectorAll('.history-tab').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.history-tab').forEach(function(b) { b.classList.remove('active'); });
+        document.querySelectorAll('.history-tab-panel').forEach(function(p) { p.classList.remove('active'); });
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+</script>
+@endpush
 @endsection

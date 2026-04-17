@@ -10,11 +10,18 @@ class HistoryController extends Controller
     public function index()
     {
         $memberId = Auth::id();
+        $today = now()->toDateString();
 
-        $history = Reservation::where('member_id', $memberId)
-            ->latest()
-            ->paginate(10);
+        $upcoming = Reservation::where('member_id', $memberId)
+            ->where('date', '>=', $today)
+            ->orderBy('date')
+            ->paginate(10, ['*'], 'upcoming_page');
 
-        return view('reservation_history', compact('history'));
+        $past = Reservation::where('member_id', $memberId)
+            ->where('date', '<', $today)
+            ->orderByDesc('date')
+            ->paginate(10, ['*'], 'past_page');
+
+        return view('reservation_history', compact('upcoming', 'past'));
     }
 }
