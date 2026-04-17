@@ -299,8 +299,38 @@
         const slotSelect  = document.getElementById('time_slots_id');
         const dateInput   = document.getElementById('date');
         const bookedUrl   = '{{ route('api.booked-slots') }}';
+        const guestsInput  = document.getElementById('num_guests');
+        const capacityHint = document.getElementById('capacity-hint');
+        const capacityVal  = document.getElementById('capacity-val');
+        const capWarning   = document.getElementById('capacity-warning');
 
         let selectedTableId = null;
+        let selectedCapacity = null;
+
+        function updateCapacityUI(capacity) {
+            selectedCapacity = capacity;
+            if (capacity) {
+                guestsInput.max = capacity;
+                capacityVal.textContent = capacity;
+                capacityHint.classList.remove('hidden');
+            } else {
+                guestsInput.removeAttribute('max');
+                capacityHint.classList.add('hidden');
+            }
+            checkCapacity();
+        }
+
+        function checkCapacity() {
+            if (selectedCapacity && guestsInput.value && parseInt(guestsInput.value) > selectedCapacity) {
+                capWarning.classList.remove('hidden');
+                guestsInput.setCustomValidity('Exceeds table capacity of ' + selectedCapacity + '.');
+            } else {
+                capWarning.classList.add('hidden');
+                guestsInput.setCustomValidity('');
+            }
+        }
+
+        guestsInput.addEventListener('input', checkCapacity);
 
         async function refreshSlots() {
             if (!selectedTableId || !dateInput.value) return;
@@ -321,6 +351,7 @@
         tableCards.forEach(card => {
             card.addEventListener('click', () => {
                 selectedTableId = card.dataset.tableId;
+                updateCapacityUI(parseInt(card.dataset.capacity) || null);
                 refreshSlots();
             });
         });
@@ -328,7 +359,9 @@
         // trigger for pre-selected table (after validation errors)
         const preSelected = document.querySelector('.table-card input[type=radio]:checked');
         if (preSelected) {
-            selectedTableId = preSelected.closest('.table-card').dataset.tableId;
+            const preCard = preSelected.closest('.table-card');
+            selectedTableId = preCard.dataset.tableId;
+            updateCapacityUI(parseInt(preCard.dataset.capacity) || null);
             refreshSlots();
         }
 
