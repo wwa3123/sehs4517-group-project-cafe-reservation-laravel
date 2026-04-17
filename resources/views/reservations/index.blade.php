@@ -44,14 +44,19 @@
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->num_guests }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
-                                    @foreach($reservation->reservedSlots as $slot)
-                                        <div>{{ $slot->table->name }}</div>
+                                    @foreach($reservation->reservedSlots->pluck('table.name')->unique() as $tableName)
+                                        <div>{{ $tableName }}</div>
                                     @endforeach
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
-                                    @foreach($reservation->reservedSlots as $slot)
-                                        <div>{{ \Carbon\Carbon::parse($slot->timeSlot->start_time)->format('h:i A') }}</div>
-                                    @endforeach
+                                    @php
+                                        $slots = $reservation->reservedSlots->sortBy('timeSlot.start_time');
+                                        $first = $slots->first()?->timeSlot;
+                                        $last  = $slots->last()?->timeSlot;
+                                    @endphp
+                                    @if($first && $last)
+                                        {{ \Carbon\Carbon::parse($first->start_time)->format('h:i A') }} – {{ \Carbon\Carbon::parse($last->end_time)->format('h:i A') }}
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     @php
