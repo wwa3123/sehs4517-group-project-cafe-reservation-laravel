@@ -9,22 +9,19 @@ class Reservation extends Model
 {
     use HasFactory;
 
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
     protected $primaryKey = 'reservation_id';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'member_id',
+        'event_id',
         'date',
         'num_guests',
+        'discount_tokens_used',
+        'discount_amount_saved',
+    ];
+
+    protected $casts = [
+        'date' => 'datetime',
     ];
 
     /**
@@ -32,11 +29,27 @@ class Reservation extends Model
      */
     public function member()
     {
-        return $this->belongsTo(Member::class, 'member_id', 'member_id');
+        return $this->belongsTo(Member::class, 'member_id');
     }
 
     /**
-     * Get all the reservation's loyalty transactions.
+     * Get the event linked to this reservation.
+     */
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id', 'event_id');
+    }
+
+    /**
+     * Get the reserved slots for the reservation.
+     */
+    public function reservedSlots()
+    {
+        return $this->hasMany(ReservedSlot::class, 'reservation_id', 'reservation_id');
+    }
+
+    /**
+     * Get all loyalty transactions for this reservation.
      */
     public function loyaltyTransactions()
     {

@@ -1,0 +1,150 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Event;
+use App\Models\EventRegistration;
+use App\Models\Member;
+use App\Models\ReservedSlot;
+use App\Models\Table;
+use App\Models\TimeSlot;
+use App\Services\ReservationService;
+use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+
+class EventController extends Controller
+{
+    protected ReservationService $reservationService;
+
+    public function __construct(ReservationService $reservationService)
+    {
+        $this->reservationService = $reservationService;
+    }
+
+    public function index()
+    {
+        $events = Event::withSum([
+            'registrations as registered_tickets' => function ($query) {
+                $query->where('payment_status', '!=', 'CANCELLED');
+            }
+        ], 'num_tickets')
+            ->orderBy('event_date')
+            ->get()
+            ->map(function (Event $event) {
+                $registeredTickets = (int) ($event->registered_tickets ?? 0);
+
+                $event->registered_tickets = $registeredTickets;
+                $event->available_tickets = max(0, (int) $event->max_participants - $registeredTickets);
+
+                return $event;
+            });
+
+        return view('events.index', compact('events'));
+    }
+
+    public function create()
+    {
+        $tables = Table::all();
+        $timeSlots = TimeSlot::all();
+        return view('events.create', compact('tables', 'timeSlots'));
+    }
+
+    public function store(Request $request)
+    {
+        $request->validate([
+            'event_name' => ['required', 'string', 'max:255'],
+            'event_descriptions' => ['nullable', 'string', 'max:255'],
+            'event_fee' => ['required', 'integer', 'min:0'],
+            'max_participants' => ['required', 'integer', 'min:1'],
+            'event_date' => ['required', 'date', 'after_or_equal:today'],
+            'num_guests' => ['required', 'integer', 'min:1'],
+            'table_id' => ['required', 'exists:tables,table_id'],
+            'time_slots_id' => ['required', 'array', 'min:1'],
+            'time_slots_id.*' => [
+                'distinct',
+                'exists:time_slots,time_slots_id',
+                function ($attribute, $value, $fail) use ($request) {
+                    $eventDate = Carbon::parse($request->input('event_date'))->toDateString();
+                    $isBooked = ReservedSlot::where('table_id', $request->input('table_id'))
+                        ->where('time_slots_id', $value)
+                        ->whereHas('reservation', fn ($q) => $q->whereDate('date', $eventDate))
+                        ->exists();
+                    if ($isBooked) {
+                        $timeSlot = TimeSlot::find($value);
+                        $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
+                        $fail("The selected table is not available at {$startTime} on the event date.");
+                    }
+                },
+            ],
+        ]);
+
+        $reservationService = $this->reservationService;
+
+        $event = DB::transaction(function () use ($request, $reservationService) {
+            $event = Event::create($request->only([
+                'event_name', 'event_descriptions', 'event_fee', 'max_participants', 'event_date',
+            ]));
+
+            $reservationService->createReservation([
+                'event_id'      => $event->event_id,
+                'date'          => Carbon::parse($event->event_date)->toDateString(),
+                'num_guests'    => $request->input('num_guests'),
+                'table_id'      => $request->input('table_id'),
+                'time_slots_id' => $request->input('time_slots_id'),
+            ]);
+
+            return $event;
+        });
+
+        return redirect()->route('events.show', $event)
+            ->with('success', 'Event created and reservation slot reserved successfully.');
+    }
+
+    public function show(Event $event)
+    {
+        $event->load(['registrations.member']);
+
+        $registeredTickets = (int) $event->registrations
+            ->where('payment_status', '!=', 'CANCELLED')
+            ->sum('num_tickets');
+
+        $availableTickets = max(0, (int) $event->max_participants - $registeredTickets);
+        $members = Member::where('role', '!=', 'system')->orWhereNull('role')->orderBy('first_name')->get();
+
+        return view('events.show', compact('event', 'members', 'registeredTickets', 'availableTickets'));
+    }
+
+    public function join(Request $request, Event $event)
+    {
+        $validated = $request->validate([
+            'member_id' => ['required', 'exists:members,member_id'],
+            'num_tickets' => ['required', 'integer', 'min:1'],
+        ]);
+
+        return DB::transaction(function () use ($event, $validated) {
+            $registeredTickets = (int) EventRegistration::query()
+                ->where('event_id', $event->event_id)
+                ->where('payment_status', '!=', 'CANCELLED')
+                ->sum('num_tickets');
+
+            $requested = (int) $validated['num_tickets'];
+            $availableTickets = (int) $event->max_participants - $registeredTickets;
+
+            if ($requested > $availableTickets) {
+                return back()->withErrors([
+                    'num_tickets' => 'Not enough available tickets for this event.',
+                ])->withInput();
+            }
+
+            EventRegistration::create([
+                'event_id' => $event->event_id,
+                'member_id' => $validated['member_id'],
+                'num_tickets' => $requested,
+                'payment_status' => 'PENDING',
+            ]);
+
+            return redirect()->route('events.show', $event)->with('success', 'Successfully joined event.');
+        });
+    }
+}
