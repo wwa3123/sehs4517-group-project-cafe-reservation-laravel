@@ -57,7 +57,15 @@ class ReservationController extends Controller
         $request->validate([
             'member_id' => ['required', 'exists:members,member_id'],
             'date' => ['required', 'date', 'after_or_equal:today'],
-            'num_guests' => ['required', 'integer', 'min:1'],
+            'num_guests' => [
+                'required', 'integer', 'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    $table = Table::find($request->input('table_id'));
+                    if ($table && $value > $table->capacity) {
+                        $fail("Number of guests ({$value}) exceeds the table's maximum capacity of {$table->capacity}.");
+                    }
+                },
+            ],
             'table_id' => ['required', 'exists:tables,table_id'],
             'time_slots_id' => ['required', 'array', 'min:1'],
             'time_slots_id.*' => [

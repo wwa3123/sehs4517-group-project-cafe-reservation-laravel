@@ -67,8 +67,12 @@
                 </div>
 
                     <div class="sm:col-span-2">
-                        <label for="num_guests" class="mb-1.5 block text-sm font-medium text-gray-700">Number of Guests</label>
+                        <label for="num_guests" class="mb-1.5 block text-sm font-medium text-gray-700">
+                            Number of Guests
+                            <span id="capacity-hint" class="ml-2 text-xs font-normal text-gray-400 hidden">(max <span id="capacity-val"></span>)</span>
+                        </label>
                         <input type="number" name="num_guests" id="num_guests" value="{{ old('num_guests') }}" min="1" required class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <p id="capacity-warning" class="hidden mt-1 text-xs text-red-600">Exceeds the selected table's maximum capacity.</p>
                     </div>
                 </div>
 
