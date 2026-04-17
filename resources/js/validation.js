@@ -52,7 +52,7 @@ document.getElementById('setpassword')?.addEventListener('input', (e) => {
 
     bar.style.width = strength + '%';
     bar.className = `h-full transition-all ${strength > 75 ? 'bg-green-500' : strength > 33 ? 'bg-orange-500' : 'bg-red-500'} ${strength != 0 ? 'mt-1' : ''}`;
-    barcontainer.className = `h-1 w-full bg-gray-200 mb-4`;
+    barcontainer.className = `h-1 w-full mb-4`;
 });
 
 
@@ -83,5 +83,5 @@ document.getElementById('reset')?.addEventListener('click', () => {
 
     bar.style.width = 0;
     bar.className = `h-full transition-all bg-red-500`;
-    barcontainer.className = `h-1 w-full bg-gray-200 mb-4`;
+    barcontainer.className = `h-1 w-full mb-4`;
 });
