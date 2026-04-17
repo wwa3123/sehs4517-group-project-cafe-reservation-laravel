@@ -18,6 +18,10 @@
         <div class="app-nav-inner">
             <a href="{{ route('home') }}" class="app-brand">Chit-Chat Café</a>
             <div class="app-nav-links">
+                <a href="{{ route('menu') }}"
+                   class="app-nav-link {{ request()->routeIs('menu') ? 'active' : '' }}">
+                    Menu
+                </a>
                 <a href="{{ route('reservations.index') }}"
                    class="app-nav-link {{ request()->routeIs('reservations.*') ? 'active' : '' }}">
                     Reservations

@@ -6,11 +6,14 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\RegistrationController;
 
 use App\Http\Controllers\EventController;
+use App\Http\Controllers\MenuController;
 use App\Models\ReservedSlot;
 
 Route::get('/', function () {
     return view('intro');
 })->name('home');
+
+Route::get('/menu', [MenuController::class, 'index'])->name('menu');
 
 Route::get('/tailwind', function () {
     return view('tailwindTest');
