@@ -71,11 +71,13 @@ Route::get('/api/booked-slots', function (Request $request) {
     return response()->json($booked);
 })->middleware(['auth'])->name('api.booked-slots');
 
-Route::prefix('events')->name('events.')->middleware(['auth'])->group(function () {
+Route::prefix('events')->name('events.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
+    Route::get('/{event}', [EventController::class, 'show'])->name('show');
+
+    Route::middleware(['auth'])->group(function () {
     Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
     Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
-    Route::get('/{event}', [EventController::class, 'show'])->name('show');
     Route::post('/{event}/join', function (Request $request, $event) {
         abort_unless(auth()->check(), 403);
 
@@ -87,4 +89,5 @@ Route::prefix('events')->name('events.')->middleware(['auth'])->group(function (
 
         return app(EventController::class)->join($request, $eventModel);
     })->name('join');
-});
+    }); // end auth
+}); // end events prefix
