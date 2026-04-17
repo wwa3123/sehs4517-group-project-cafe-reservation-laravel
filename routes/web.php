@@ -39,7 +39,7 @@ require __DIR__.'/web_login_and_history.php';
 Route::get('/reservation/thankyou', function () {
 
 //fetch some popular games from database
-$popularGames = \App\Models|Game::inRandomOrder()->limit(3)->get(['title'])->pluck('title')->toArray();
+$popularGames = \App\Models\Game::inRandomOrder()->limit(3)->get(['title'])->pluck('title')->toArray();
 
 
 //if no games in database yet, use fallback
