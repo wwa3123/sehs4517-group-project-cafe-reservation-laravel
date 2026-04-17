@@ -21,7 +21,7 @@ class ReservationService
                 [
                     'first_name' => 'Event',
                     'last_name' => 'Placeholder',
-                    'password_hash' => Hash::make('dummy-member-password'),
+                    'password_hash' => Hash::make(bin2hex(random_bytes(32))),
                     'role' => 'system',
                     'subscribe_events' => false,
                     'loyalty_points' => 0,

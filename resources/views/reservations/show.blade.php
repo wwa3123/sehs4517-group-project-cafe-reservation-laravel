@@ -29,7 +29,7 @@
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Event</dt>
-                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->event->event_name ?? 'None' }}</dd>
+                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->event?->event_name ?? 'None' }}</dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Number of Guests</dt>
@@ -57,7 +57,7 @@
                 </div>
                 <div class="sm:col-span-2">
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Table</dt>
-                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->reservedSlots->first()->table->name ?? 'N/A' }}</dd>
+                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->reservedSlots->first()?->table?->name ?? 'N/A' }}</dd>
                 </div>
             </dl>
 

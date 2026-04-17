@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Member;
 use App\Models\Reservation;
+use Illuminate\Support\Facades\DB;
 
 class LoyaltyRedemptionService
 {
@@ -48,20 +49,22 @@ class LoyaltyRedemptionService
 
         $discountAmount = self::calculateDiscount($tokensToSpend);
 
-        $reservation->update([
-            'discount_tokens_used' => $tokensToSpend,
-            'discount_amount_saved' => $discountAmount,
-        ]);
+        DB::transaction(function () use ($reservation, $member, $tokensToSpend, $discountAmount) {
+            $reservation->update([
+                'discount_tokens_used' => $tokensToSpend,
+                'discount_amount_saved' => $discountAmount,
+            ]);
 
-        // Create negative loyalty transaction
-        $reservation->loyaltyTransactions()->create([
-            'txn_type' => 'RESERVATION',
-            'points' => -$tokensToSpend,
-            'descriptions' => "Loyalty tokens redeemed for $" . number_format($discountAmount, 2) . " discount on reservation #" . $reservation->reservation_id,
-        ]);
+            // Create negative loyalty transaction
+            $reservation->loyaltyTransactions()->create([
+                'txn_type' => 'RESERVATION',
+                'points' => -$tokensToSpend,
+                'descriptions' => "Loyalty tokens redeemed for $" . number_format($discountAmount, 2) . " discount on reservation #" . $reservation->reservation_id,
+            ]);
 
-        // Deduct tokens from member
-        $member->decrement('loyalty_points', $tokensToSpend);
+            // Deduct tokens from member
+            $member->decrement('loyalty_points', $tokensToSpend);
+        });
 
         return true;
     }

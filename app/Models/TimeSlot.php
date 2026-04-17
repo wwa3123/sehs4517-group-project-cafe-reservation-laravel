@@ -27,16 +27,6 @@ class TimeSlot extends Model
     ];
 
     /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'start_time' => 'datetime:H:i:s',
-        'end_time' => 'datetime:H:i:s',
-    ];
-
-    /**
      * Get the reserved slots for the time slot.
      */
     public function reservedSlots()

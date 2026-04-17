@@ -46,7 +46,7 @@
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('Y-m-d') }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
-                                    {{ $reservation->event->event_name ?? 'None' }}
+                                    {{ $reservation->event?->event_name ?? 'None' }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->num_guests }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">

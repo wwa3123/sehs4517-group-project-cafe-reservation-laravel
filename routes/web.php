@@ -69,12 +69,20 @@ Route::get('/api/booked-slots', function (Request $request) {
         ->pluck('time_slots_id');
 
     return response()->json($booked);
-})->name('api.booked-slots');
+})->middleware(['auth'])->name('api.booked-slots');
 
-Route::prefix('events')->name('events.')->group(function () {
+Route::prefix('events')->name('events.')->middleware(['auth'])->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
     Route::get('/create', [EventController::class, 'create'])->name('create');
     Route::post('/', [EventController::class, 'store'])->name('store');
     Route::get('/{event}', [EventController::class, 'show'])->name('show');
-    Route::post('/{event}/join', [EventController::class, 'join'])->name('join');
+    Route::post('/{event}/join', function (Request $request, $event) {
+        abort_unless(auth()->check(), 403);
+
+        $request->merge([
+            'member_id' => auth()->id(),
+        ]);
+
+        return app(EventController::class)->join($request, $event);
+    })->name('join');
 });

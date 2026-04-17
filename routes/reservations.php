@@ -16,7 +16,7 @@ use App\Http\Controllers\ReservationController;
 
 // Admin route to get all reservations
 
-Route::prefix('reservations')->name('reservations.')->group(function () {
+Route::middleware('auth')->prefix('reservations')->name('reservations.')->group(function () {
 
     Route::get('/', [ReservationController::class, 'index'])->name('index');
 

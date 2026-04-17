@@ -56,6 +56,7 @@ class ReservationController extends Controller
 
             // Use the '*' to apply this rule to each item in the time_slots_id array
             'time_slots_id.*' => [
+                'distinct',
                 'exists:time_slots,time_slots_id',
 
                 // Custom Closure Rule for availability
@@ -125,7 +126,7 @@ class ReservationController extends Controller
     {
         $reservation = Reservation::with('member')->findOrFail($reservation);
         $member = $reservation->member;
-        $availableTokens = $member->loyalty_points - $reservation->discount_tokens_used;
+        $availableTokens = $member->loyalty_points;
         $discountTiers = LoyaltyRedemptionService::getDiscountTiers($availableTokens);
 
         return view('reservations.redeem', compact('reservation', 'discountTiers', 'availableTokens'));
@@ -134,8 +135,18 @@ class ReservationController extends Controller
     public function applyDiscount(Request $request, $reservation)
     {
         $reservation = Reservation::with('member')->findOrFail($reservation);
+        $availableTokens = max(0, $reservation->member->loyalty_points - $reservation->discount_tokens_used);
+
+        if ($reservation->discount_tokens_used > 0 || $reservation->discount_amount_saved > 0) {
+            return back()->withErrors('A loyalty discount has already been applied to this reservation.');
+        }
+
+        if ($availableTokens < 1) {
+            return back()->withErrors('No loyalty tokens are available to redeem for this reservation.');
+        }
+
         $request->validate([
-            'tokens_to_spend' => ['required', 'integer', 'min:1', 'max:' . $reservation->member->loyalty_points],
+            'tokens_to_spend' => ['required', 'integer', 'min:1', 'max:' . $availableTokens],
         ]);
 
         $tokens = $request->input('tokens_to_spend');

@@ -24,16 +24,21 @@ class EventController extends Controller
 
     public function index()
     {
-        $events = Event::orderBy('event_date')->get()->map(function (Event $event) {
-            $registeredTickets = (int) $event->registrations()
-                ->where('payment_status', '!=', 'CANCELLED')
-                ->sum('num_tickets');
+        $events = Event::withSum([
+            'registrations as registered_tickets' => function ($query) {
+                $query->where('payment_status', '!=', 'CANCELLED');
+            }
+        ], 'num_tickets')
+            ->orderBy('event_date')
+            ->get()
+            ->map(function (Event $event) {
+                $registeredTickets = (int) ($event->registered_tickets ?? 0);
 
-            $event->registered_tickets = $registeredTickets;
-            $event->available_tickets = max(0, (int) $event->max_participants - $registeredTickets);
+                $event->registered_tickets = $registeredTickets;
+                $event->available_tickets = max(0, (int) $event->max_participants - $registeredTickets);
 
-            return $event;
-        });
+                return $event;
+            });
 
         return view('events.index', compact('events'));
     }
@@ -57,6 +62,7 @@ class EventController extends Controller
             'table_id' => ['required', 'exists:tables,table_id'],
             'time_slots_id' => ['required', 'array', 'min:1'],
             'time_slots_id.*' => [
+                'distinct',
                 'exists:time_slots,time_slots_id',
                 function ($attribute, $value, $fail) use ($request) {
                     $eventDate = Carbon::parse($request->input('event_date'))->toDateString();

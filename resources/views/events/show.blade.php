@@ -108,7 +108,7 @@
                     <tbody class="divide-y divide-gray-100">
                         @forelse($event->registrations as $registration)
                             <tr class="hover:bg-gray-50">
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->member->first_name ?? 'Unknown' }} {{ $registration->member->last_name ?? '' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->member?->first_name ?? 'Unknown' }} {{ $registration->member?->last_name ?? '' }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->num_tickets }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->payment_status }}</td>
                             </tr>
