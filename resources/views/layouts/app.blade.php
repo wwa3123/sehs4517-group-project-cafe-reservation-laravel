@@ -26,6 +26,10 @@
                    class="app-nav-link {{ request()->routeIs('events.*') ? 'active' : '' }}">
                     Events
                 </a>
+                <a href="{{ route('occupancy') }}"
+                   class="app-nav-link {{ request()->routeIs('occupancy') ? 'active' : '' }}">
+                    Live Occupancy
+                </a>
                 @auth
                 <a href="{{ route('profile') }}"
                    class="app-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
