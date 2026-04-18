@@ -6,7 +6,6 @@ use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Member;
 use App\Models\ReservedSlot;
-use App\Models\TimeSlot;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
