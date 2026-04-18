@@ -15,10 +15,6 @@ Route::get('/', function () {
 
 Route::get('/menu', [MenuController::class, 'index'])->name('menu');
 
-Route::get('/tailwind', function () {
-    return view('tailwindTest');
-});
-
 Route::get('/register', [RegistrationController::class, 'show'])->name('register');
 Route::post('/register', [RegistrationController::class, 'register']);
 Route::get('/check-email', [RegistrationController::class, 'checkEmail']);
