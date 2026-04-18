@@ -78,6 +78,7 @@ class EventService
             foreach ((array) $data['table_id'] as $tableId) {
                 $this->reservationService->createReservation([
                     'member_id'     => $systemMember->member_id,
+                    'event_id'      => $event->event_id,
                     'date'          => $eventDate,
                     'num_guests'    => $data['num_guests'],
                     'table_id'      => $tableId,
@@ -156,14 +157,35 @@ class EventService
     }
 
     /**
-     * Update basic event details. If the event date changes, the linked system reservations are updated too.
+     * Return the current table IDs, time-slot IDs, and num_guests for the event's system reservation,
+     * used to pre-populate the edit form.
+     *
+     * @return array{currentTableIds: array, currentTimeSlotIds: array, currentNumGuests: int}
+     */
+    public function getEditData(Event $event): array
+    {
+        $systemMember       = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
+        $currentTableIds    = [];
+        $currentTimeSlotIds = [];
+        $currentNumGuests   = (int) $event->max_participants;
+
+        if ($systemMember) {
+            $reservations       = Reservation::where('member_id', $systemMember->member_id)->with('reservedSlots')->get();
+            $currentTableIds    = $reservations->flatMap->reservedSlots->pluck('table_id')->unique()->values()->toArray();
+            $firstReservation   = $reservations->first();
+            $currentTimeSlotIds = $firstReservation?->reservedSlots->pluck('time_slots_id')->toArray() ?? [];
+            $currentNumGuests   = $firstReservation?->num_guests ?? $currentNumGuests;
+        }
+
+        return compact('currentTableIds', 'currentTimeSlotIds', 'currentNumGuests');
+    }
+
+    /**
+     * Update event details and sync the linked system reservations (date, guests, tables, time-slots).
      */
     public function updateEvent(Event $event, array $data): Event
     {
         DB::transaction(function () use ($event, $data) {
-            $oldDate = Carbon::parse($event->event_date)->toDateString();
-            $newDate = Carbon::parse($data['event_date'])->toDateString();
-
             $event->update([
                 'event_name'         => $data['event_name'],
                 'event_descriptions' => $data['event_descriptions'] ?? null,
@@ -172,11 +194,38 @@ class EventService
                 'event_date'         => $data['event_date'],
             ]);
 
-            if ($oldDate !== $newDate) {
-                $systemMember = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
-                if ($systemMember) {
-                    Reservation::where('member_id', $systemMember->member_id)
-                        ->update(['date' => $newDate]);
+            $systemMember = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
+            if (!$systemMember) {
+                return;
+            }
+
+            // Delete all existing system reservations for this event
+            $existing = Reservation::where('member_id', $systemMember->member_id)->get();
+            foreach ($existing as $reservation) {
+                $reservation->loyaltyTransactions()->delete();
+                $reservation->reservedSlots()->delete();
+                $reservation->delete();
+            }
+
+            // Re-create reservations for the updated table / time-slot selection
+            $newDate   = Carbon::parse($data['event_date'])->toDateString();
+            $numGuests = (int) ($data['num_guests'] ?? $data['max_participants']);
+
+            foreach ((array) ($data['table_id'] ?? []) as $tableId) {
+                $reservation = Reservation::create([
+                    'member_id'  => $systemMember->member_id,
+                    'event_id'   => $event->event_id,
+                    'date'       => $newDate,
+                    'num_guests' => $numGuests,
+                ]);
+
+                foreach ((array) ($data['time_slots_id'] ?? []) as $timeSlotId) {
+                    ReservedSlot::create([
+                        'reservation_id' => $reservation->reservation_id,
+                        'table_id'       => $tableId,
+                        'time_slots_id'  => $timeSlotId,
+                        'source_type'    => 'RESERVATION',
+                    ]);
                 }
             }
         });
@@ -203,7 +252,7 @@ class EventService
                 $systemMember->delete();
             }
 
-            // event_registrations cascade from event_id FK
+            $event->registrations()->delete();
             $event->delete();
         });
     }

@@ -6,12 +6,16 @@
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">Reservation #{{ $reservation->reservation_id }}</h1>
             <div class="flex items-center gap-2">
                 @if(auth()->user()?->role === 'admin')
+                    @if($reservation->member?->role !== 'system')
                     <a href="{{ route('reservations.edit', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Edit</a>
+                    @endif
+                    @if($reservation->member?->role !== 'system')
                     <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Delete this reservation? This cannot be undone.')">
                         @csrf
                         @method('DELETE')
                         <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50">Delete</button>
                     </form>
+                    @endif
                 @endif
                 <a href="{{ route('reservations.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Back to List</a>
             </div>
@@ -21,11 +25,24 @@
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Member</dt>
-                    <dd class="mt-1 text-sm font-medium text-gray-900">{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}</dd>
+                    <dd class="mt-1 text-sm font-medium text-gray-900">
+                        @if($reservation->member?->role === 'system')
+                            {{ $reservation->event?->event_name ?? $reservation->member->first_name }}
+                            <span class="ml-1 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Event</span>
+                        @else
+                            {{ $reservation->member->first_name }} {{ $reservation->member->last_name }}
+                        @endif
+                    </dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</dt>
-                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->member->email }}</dd>
+                    <dd class="mt-1 text-sm text-gray-700">
+                        @if($reservation->member?->role === 'system')
+                            —
+                        @else
+                            {{ $reservation->member->email }}
+                        @endif
+                    </dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Date</dt>

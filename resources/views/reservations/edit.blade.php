@@ -25,7 +25,7 @@
                 {{-- Member (read-only) --}}
                 <div>
                     <label class="mb-1.5 block text-sm font-medium text-gray-700">Member</label>
-                    <input type="text" disabled value="{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}"
+                    <input type="text" disabled value="@if($reservation->member?->role === 'system'){{ $reservation->event?->event_name ?? $reservation->member->first_name }} (Event)@else{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}@endif"
                         class="block w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2.5 text-sm text-gray-600 cursor-not-allowed">
                 </div>
 

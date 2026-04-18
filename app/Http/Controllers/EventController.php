@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreEventRequest;
+use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
+use App\Models\EventRegistration;
 use App\Models\Member;
 use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\EventService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -27,42 +29,15 @@ class EventController extends Controller
 
     public function create()
     {
-        $tables = Table::all();
-        $timeSlots = TimeSlot::all();
-        return view('events.create', compact('tables', 'timeSlots'));
+        return view('events.create', [
+            'tables'    => Table::all(),
+            'timeSlots' => TimeSlot::all(),
+        ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreEventRequest $request)
     {
-        $request->validate([
-            'event_name'          => ['required', 'string', 'max:255'],
-            'event_descriptions'  => ['nullable', 'string', 'max:255'],
-            'event_fee'           => ['required', 'integer', 'min:0', 'max:99999'],
-            'max_participants'    => ['required', 'integer', 'min:1'],
-            'event_date'          => ['required', 'date', 'after:now'],
-            'num_guests'          => ['required', 'integer', 'min:1'],
-            'table_id'            => ['required', 'array', 'min:1'],
-            'table_id.*'          => ['exists:tables,table_id'],
-            'time_slots_id'       => ['required', 'array', 'min:1'],
-            'time_slots_id.*'     => [
-                'distinct',
-                'exists:time_slots,time_slots_id',
-                function ($attribute, $value, $fail) use ($request) {
-                    $eventDate = Carbon::parse($request->input('event_date'))->toDateString();
-                    foreach ((array) $request->input('table_id') as $tableId) {
-                        if ($this->eventService->isSlotBooked((int) $tableId, (int) $value, $eventDate)) {
-                            $timeSlot  = TimeSlot::find($value);
-                            $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
-                            $tableName = \App\Models\Table::find($tableId)?->name ?? $tableId;
-                            $fail("Table '{$tableName}' is not available at {$startTime} on the event date.");
-                            return;
-                        }
-                    }
-                },
-            ],
-        ]);
-
-        $event = $this->eventService->createEvent($request->all());
+        $event = $this->eventService->createEvent($request->validated());
 
         return redirect()->route('events.show', $event)
             ->with('success', 'Event created and reservation slot reserved successfully.');
@@ -82,10 +57,13 @@ class EventController extends Controller
                 ->first()
             : null;
 
-        $registeredTickets = $stats['registered'];
-        $availableTickets  = $stats['available'];
-
-        return view('events.show', compact('event', 'members', 'registeredTickets', 'availableTickets', 'userRegistration'));
+        return view('events.show', [
+            'event'              => $event,
+            'members'            => $members,
+            'registeredTickets'  => $stats['registered'],
+            'availableTickets'   => $stats['available'],
+            'userRegistration'   => $userRegistration,
+        ]);
     }
 
     public function join(Request $request, Event $event)
@@ -113,20 +91,16 @@ class EventController extends Controller
 
     public function edit(Event $event)
     {
-        return view('events.edit', compact('event'));
+        return view('events.edit', [
+            'event'     => $event,
+            'tables'    => Table::all(),
+            'timeSlots' => TimeSlot::all(),
+        ] + $this->eventService->getEditData($event));
     }
 
-    public function update(Request $request, Event $event)
+    public function update(UpdateEventRequest $request, Event $event)
     {
-        $request->validate([
-            'event_name'         => ['required', 'string', 'max:255'],
-            'event_descriptions' => ['nullable', 'string', 'max:255'],
-            'event_fee'          => ['required', 'integer', 'min:0', 'max:99999'],
-            'max_participants'   => ['required', 'integer', 'min:1'],
-            'event_date'         => ['required', 'date'],
-        ]);
-
-        $this->eventService->updateEvent($event, $request->all());
+        $this->eventService->updateEvent($event, $request->validated());
 
         return redirect()->route('events.show', $event)->with('success', 'Event updated successfully.');
     }
@@ -136,5 +110,14 @@ class EventController extends Controller
         $this->eventService->deleteEvent($event);
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
+    }
+
+    public function removeRegistration(Event $event, EventRegistration $registration)
+    {
+        abort_if($registration->event_id !== $event->event_id, 404);
+
+        $registration->delete();
+
+        return redirect()->route('events.show', $event)->with('success', 'Registration removed.');
     }
 }

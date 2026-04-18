@@ -119,6 +119,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Member</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Tickets</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
@@ -127,10 +128,17 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->member?->first_name ?? 'Unknown' }} {{ $registration->member?->last_name ?? '' }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->num_tickets }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $registration->payment_status }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <form action="{{ route('events.registrations.destroy', [$event, $registration]) }}" method="POST" onsubmit="return confirm('Remove this registration?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50">Remove</button>
+                                    </form>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="3" class="px-4 py-8 text-center text-sm text-gray-500">No registrations yet.</td>
+                                <td colspan="4" class="px-4 py-8 text-center text-sm text-gray-500">No registrations yet.</td>
                             </tr>
                         @endforelse
                     </tbody>

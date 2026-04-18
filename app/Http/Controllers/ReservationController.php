@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreReservationRequest;
+use App\Http\Requests\UpdateReservationRequest;
+use App\Models\EventRegistration;
 use App\Models\Member;
 use App\Models\Reservation;
-use App\Models\ReservedSlot;
 use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\ReservationService;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ReservationController extends Controller
 {
@@ -22,7 +22,19 @@ class ReservationController extends Controller
         $query = Reservation::with('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
 
         if ($user->role !== 'admin') {
-            $query->where('member_id', $user->member_id);
+            $joinedEventIds = EventRegistration::where('member_id', $user->member_id)
+                ->where('payment_status', '!=', 'CANCELLED')
+                ->pluck('event_id');
+
+            $query->where(function ($q) use ($user, $joinedEventIds) {
+                $q->where('member_id', $user->member_id);
+                if ($joinedEventIds->isNotEmpty()) {
+                    $q->orWhere(function ($q2) use ($joinedEventIds) {
+                        $q2->whereIn('event_id', $joinedEventIds)
+                           ->whereHas('member', fn ($m) => $m->where('role', 'system'));
+                    });
+                }
+            });
         }
 
         $reservations = $query->paginate(15);
@@ -31,63 +43,17 @@ class ReservationController extends Controller
 
     public function create(Request $request)
     {
-        $members   = Member::where('role', '!=', 'system')->orWhereNull('role')->get();
-        $tables    = Table::all();
-        $timeSlots = TimeSlot::all();
+        $members     = Member::where('role', '!=', 'system')->orWhereNull('role')->get();
+        $tables      = Table::all();
+        $timeSlots   = TimeSlot::all();
         $prefillDate = $request->query('date');
 
         return view('reservations.create', compact('members', 'tables', 'timeSlots', 'prefillDate'));
     }
 
-    public function store(Request $request)
+    public function store(StoreReservationRequest $request)
     {
-        $request->validate([
-            'member_id'       => [
-                'required', 'exists:members,member_id',
-                function ($attribute, $value, $fail) {
-                    if (auth()->user()->role !== 'admin' && (int) $value !== auth()->id()) {
-                        $fail('You can only make reservations for yourself.');
-                    }
-                },
-            ],
-            'event_id'        => ['nullable', 'exists:events,event_id'],
-            'tokens_to_spend' => [
-                'nullable', 'integer', 'min:0',
-                function ($attribute, $value, $fail) use ($request) {
-                    $memberId = (int) $request->input('member_id');
-                    $member = \App\Models\Member::find($memberId);
-                    if ($value && $member && $value > $member->loyalty_points) {
-                        $fail('The selected member does not have enough loyalty tokens.');
-                    }
-                },
-            ],
-            'date'            => ['required', 'date', 'after_or_equal:today'],
-            'num_guests'      => [
-                'required', 'integer', 'min:1',
-                function ($attribute, $value, $fail) use ($request) {
-                    $table = Table::find($request->input('table_id'));
-                    if ($table && $value > $table->capacity) {
-                        $fail("Number of guests ({$value}) exceeds the table's maximum capacity of {$table->capacity}.");
-                    }
-                },
-            ],
-            'table_id'        => ['required', 'exists:tables,table_id'],
-            'time_slots_id'   => ['required', 'array', 'min:1'],
-            'time_slots_id.*' => [
-                'distinct',
-                'exists:time_slots,time_slots_id',
-                function ($attribute, $value, $fail) use ($request) {
-                    $date = Carbon::parse($request->input('date'))->toDateString();
-                    if ($this->reservationService->isSlotBooked((int) $request->input('table_id'), (int) $value, $date)) {
-                        $timeSlot  = TimeSlot::find($value);
-                        $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
-                        $fail("The selected table is not available at {$startTime}.");
-                    }
-                },
-            ],
-        ]);
-
-        $reservation = $this->reservationService->createReservation($request->all());
+        $reservation  = $this->reservationService->createReservation($request->validated());
         $thankYouData = $this->reservationService->buildThankYouData(
             $reservation,
             (int) $request->input('tokens_to_spend', 0)
@@ -98,8 +64,17 @@ class ReservationController extends Controller
 
     public function show(Reservation $reservation)
     {
-        if (auth()->user()->role !== 'admin' && auth()->id() !== $reservation->member_id) {
-            abort(403);
+        $user = auth()->user();
+
+        if ($user->role !== 'admin' && $user->member_id !== $reservation->member_id) {
+            $isJoinedEvent = $reservation->member?->role === 'system'
+                && $reservation->event_id
+                && EventRegistration::where('member_id', $user->member_id)
+                    ->where('event_id', $reservation->event_id)
+                    ->where('payment_status', '!=', 'CANCELLED')
+                    ->exists();
+
+            abort_unless($isJoinedEvent, 403);
         }
 
         $reservation->load('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
@@ -108,67 +83,29 @@ class ReservationController extends Controller
 
     public function edit(Reservation $reservation)
     {
+        if ($reservation->member?->role === 'system') {
+            return redirect()->route('reservations.show', $reservation)
+                ->withErrors(['error' => 'Event reservations cannot be edited here. Edit the event instead.']);
+        }
+
         $reservation->load('reservedSlots');
-        $tables             = Table::all();
-        $timeSlots          = TimeSlot::all();
         $currentTableId     = $reservation->reservedSlots->first()?->table_id;
         $currentTimeSlotIds = $reservation->reservedSlots->pluck('time_slots_id')->toArray();
 
-        return view('reservations.edit', compact('reservation', 'tables', 'timeSlots', 'currentTableId', 'currentTimeSlotIds'));
+        return view('reservations.edit', compact(
+            'reservation',
+            'currentTableId',
+            'currentTimeSlotIds',
+        ) + ['tables' => Table::all(), 'timeSlots' => TimeSlot::all()]);
     }
 
-    public function update(Request $request, Reservation $reservation)
+    public function update(UpdateReservationRequest $request, Reservation $reservation)
     {
-        $request->validate([
-            'date'            => ['required', 'date'],
-            'num_guests'      => [
-                'required', 'integer', 'min:1',
-                function ($attribute, $value, $fail) use ($request) {
-                    $table = Table::find($request->input('table_id'));
-                    if ($table && $value > $table->capacity) {
-                        $fail("Number of guests ({$value}) exceeds the table's maximum capacity of {$table->capacity}.");
-                    }
-                },
-            ],
-            'table_id'        => ['required', 'exists:tables,table_id'],
-            'time_slots_id'   => ['required', 'array', 'min:1'],
-            'time_slots_id.*' => [
-                'distinct',
-                'exists:time_slots,time_slots_id',
-                function ($attribute, $value, $fail) use ($request, $reservation) {
-                    $date    = Carbon::parse($request->input('date'))->toDateString();
-                    $tableId = (int) $request->input('table_id');
-                    $booked  = ReservedSlot::where('table_id', $tableId)
-                        ->where('time_slots_id', $value)
-                        ->whereHas('reservation', fn ($q) => $q
-                            ->whereDate('date', $date)
-                            ->where('reservation_id', '!=', $reservation->reservation_id)
-                        )->exists();
-                    if ($booked) {
-                        $timeSlot  = TimeSlot::find($value);
-                        $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
-                        $fail("The selected table is not available at {$startTime}.");
-                    }
-                },
-            ],
-        ]);
+        if ($reservation->member?->role === 'system') {
+            abort(403, 'Event reservations cannot be edited directly.');
+        }
 
-        DB::transaction(function () use ($request, $reservation) {
-            $reservation->update([
-                'date'       => $request->input('date'),
-                'num_guests' => $request->input('num_guests'),
-            ]);
-
-            $reservation->reservedSlots()->delete();
-            foreach ($request->input('time_slots_id') as $timeSlotId) {
-                ReservedSlot::create([
-                    'reservation_id' => $reservation->reservation_id,
-                    'table_id'       => $request->input('table_id'),
-                    'time_slots_id'  => $timeSlotId,
-                    'source_type'    => 'RESERVATION',
-                ]);
-            }
-        });
+        $this->reservationService->updateReservation($reservation, $request->validated());
 
         return redirect()->route('reservations.show', $reservation)->with('success', 'Reservation updated successfully.');
     }
@@ -177,16 +114,12 @@ class ReservationController extends Controller
     {
         abort_unless(auth()->user()->role === 'admin', 403);
 
-        // Reverse loyalty points earned by this reservation
-        $totalPoints = (int) $reservation->loyaltyTransactions()->sum('points');
-        if ($totalPoints > 0) {
-            Member::where('member_id', $reservation->member_id)
-                ->decrement('loyalty_points', $totalPoints);
+        if ($reservation->member?->role === 'system') {
+            return redirect()->route('reservations.show', $reservation)
+                ->withErrors(['error' => 'Event reservations cannot be deleted here. Delete the event instead.']);
         }
 
-        $reservation->loyaltyTransactions()->delete();
-        // reserved_slots cascade from reservation_id FK
-        $reservation->delete();
+        $this->reservationService->deleteReservation($reservation);
 
         return redirect()->route('reservations.index')->with('success', 'Reservation deleted successfully.');
     }
