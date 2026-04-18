@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('reservations', function (Blueprint $table) {
             $table->unsignedBigInteger('event_id')->nullable()->after('member_id');
-            $table->foreign('event_id')->references('event_id')->on('events');
+            $table->foreign('event_id')->references('event_id')->on('events')->onDelete('set null');
         });
     }
 

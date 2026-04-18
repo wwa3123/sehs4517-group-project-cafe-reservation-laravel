@@ -130,7 +130,7 @@
             </div>
 
             <div class="flex items-center gap-2.5 p-3.5 rounded-2xl mb-7 accent-box">
-                <input type="checkbox" id="subscribe" name="subscribe" class="w-4.5 h-4.5 cursor-pointer accent" style="accent-color: var(--accent);">
+                <input type="checkbox" id="subscribe" name="subscribe_events" class="w-4.5 h-4.5 cursor-pointer accent" style="accent-color: var(--accent);">
                 <label for="subscribe" class="text-sm font-medium cursor-pointer" style="color: var(--text-secondary);">Subscribe to game night events</label>
             </div>
 

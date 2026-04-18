@@ -21,8 +21,8 @@ return new class extends Migration
             $table->enum('payment_status', ['PENDING', 'COMPLETED', 'CANCELLED']);
             $table->timestamps();
             
-            $table->foreign('event_id')->references('event_id')->on('events');
-            $table->foreign('member_id')->references('member_id')->on('members');
+            $table->foreign('event_id')->references('event_id')->on('events')->onDelete('cascade');
+            $table->foreign('member_id')->references('member_id')->on('members')->onDelete('cascade');
             $table->unique(['event_id', 'member_id']);
         });
     }

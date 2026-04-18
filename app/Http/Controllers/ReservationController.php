@@ -53,9 +53,11 @@ class ReservationController extends Controller
             'event_id'        => ['nullable', 'exists:events,event_id'],
             'tokens_to_spend' => [
                 'nullable', 'integer', 'min:0',
-                function ($attribute, $value, $fail) {
-                    if ($value && $value > auth()->user()->loyalty_points) {
-                        $fail('You do not have enough loyalty tokens.');
+                function ($attribute, $value, $fail) use ($request) {
+                    $memberId = (int) $request->input('member_id');
+                    $member = \App\Models\Member::find($memberId);
+                    if ($value && $member && $value > $member->loyalty_points) {
+                        $fail('The selected member does not have enough loyalty tokens.');
                     }
                 },
             ],
