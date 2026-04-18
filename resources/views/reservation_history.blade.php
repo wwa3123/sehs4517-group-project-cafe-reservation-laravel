@@ -112,6 +112,7 @@
     <div class="history-tabs">
         <button class="history-tab active" data-tab="upcoming">Upcoming <span class="badge badge-upcoming">{{ $upcoming->total() }}</span></button>
         <button class="history-tab" data-tab="past">Past <span class="badge badge-past">{{ $past->total() }}</span></button>
+        <button class="history-tab" data-tab="events">Events <span class="badge badge-upcoming">{{ $eventRegistrations->count() }}</span></button>
     </div>
 
     {{-- Upcoming --}}
@@ -180,6 +181,44 @@
                 </div>
             @else
                 <div class="empty-message">No past reservations.</div>
+            @endif
+        </div>
+    </div>
+
+    {{-- Events --}}
+    <div class="history-tab-panel" id="tab-events">
+        <div class="table-wrapper">
+            @if($eventRegistrations->count() > 0)
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Event</th><th>Date</th><th>Tickets</th><th>Fee</th><th>Status</th><th></th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach($eventRegistrations as $reg)
+                        <tr>
+                            <td>{{ $reg->registration_id }}</td>
+                            <td>{{ $reg->event->event_name }}</td>
+                            <td>{{ \Carbon\Carbon::parse($reg->event->event_date)->format('M j, Y') }}</td>
+                            <td>{{ $reg->num_tickets }}</td>
+                            <td>${{ number_format($reg->event->event_fee / 100, 2) }}</td>
+                            <td>
+                                @php
+                                    $statusColors = ['PENDING' => '#b45309', 'CONFIRMED' => '#2c6e1e', 'CANCELLED' => '#991b1b'];
+                                    $statusBg = ['PENDING' => '#fef3c7', 'CONFIRMED' => '#e9f5e3', 'CANCELLED' => '#fee2e2'];
+                                    $color = $statusColors[$reg->payment_status] ?? '#374151';
+                                    $bg = $statusBg[$reg->payment_status] ?? '#f3f4f6';
+                                @endphp
+                                <span class="badge" style="background:{{ $bg }};color:{{ $color }}">{{ $reg->payment_status }}</span>
+                            </td>
+                            <td><a href="{{ route('events.show', $reg->event) }}" style="color:var(--accent,#4c9f2f);font-weight:600;white-space:nowrap;">View →</a></td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <div class="empty-message">
+                    No event registrations. <a href="{{ route('events.index') }}" style="color:var(--accent,#4c9f2f);">Browse events</a>
+                </div>
             @endif
         </div>
     </div>

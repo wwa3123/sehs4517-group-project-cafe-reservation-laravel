@@ -40,7 +40,14 @@ class EventController extends Controller
                 return $event;
             });
 
-        return view('events.index', compact('events'));
+        $joinedEventIds = auth()->check()
+            ? EventRegistration::where('member_id', auth()->id())
+                ->where('payment_status', '!=', 'CANCELLED')
+                ->pluck('event_id')
+                ->flip()
+            : collect();
+
+        return view('events.index', compact('events', 'joinedEventIds'));
     }
 
     public function create()
@@ -129,7 +136,14 @@ class EventController extends Controller
         $availableTickets = max(0, (int) $event->max_participants - $registeredTickets);
         $members = Member::where('role', '!=', 'system')->orWhereNull('role')->orderBy('first_name')->get();
 
-        return view('events.show', compact('event', 'members', 'registeredTickets', 'availableTickets'));
+        $userRegistration = auth()->check()
+            ? $event->registrations
+                ->where('member_id', auth()->id())
+                ->where('payment_status', '!=', 'CANCELLED')
+                ->first()
+            : null;
+
+        return view('events.show', compact('event', 'members', 'registeredTickets', 'availableTickets', 'userRegistration'));
     }
 
     public function join(Request $request, Event $event)
@@ -138,6 +152,17 @@ class EventController extends Controller
             'member_id' => ['required', 'exists:members,member_id'],
             'num_tickets' => ['required', 'integer', 'min:1'],
         ]);
+
+        $alreadyJoined = EventRegistration::where('event_id', $event->event_id)
+            ->where('member_id', $validated['member_id'])
+            ->where('payment_status', '!=', 'CANCELLED')
+            ->exists();
+
+        if ($alreadyJoined) {
+            return back()->withErrors([
+                'member_id' => 'This member has already joined this event.',
+            ])->withInput();
+        }
 
         return DB::transaction(function () use ($event, $validated) {
             $registeredTickets = (int) EventRegistration::query()
