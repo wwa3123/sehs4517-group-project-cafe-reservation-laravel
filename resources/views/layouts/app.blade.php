@@ -8,7 +8,7 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @stack('head')
 </head>
-<body class="app-page min-h-screen">
+<body class="app-page min-h-screen @yield('bodyClass')">
 
     {{-- Dark mode toggle --}}
     <button class="theme-toggle" id="themeToggleBtn" aria-label="Toggle theme">🌞</button>

@@ -16,12 +16,14 @@ body.login-page.dark {
 
 body.login-page {
     line-height: 1.5;
-    min-height: 100vh;
+}
+
+body.login-page .app-content {
+    min-height: calc(100vh - 58px); /* subtract navbar height */
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 24px 20px;
-    position: relative;
 }
 
 body.login-page .theme-toggle {
