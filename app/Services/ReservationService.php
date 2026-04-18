@@ -79,13 +79,23 @@ class ReservationService
 
     public function deleteReservation(Reservation $reservation): void
     {
-        $totalPoints = (int) $reservation->loyaltyTransactions()->sum('points');
-        if ($totalPoints > 0) {
-            Member::where('member_id', $reservation->member_id)
-                ->decrement('loyalty_points', $totalPoints);
+        // Net points for this reservation (earned = positive, spent = negative).
+        // Reversing means we subtract the net from the member's balance.
+        // e.g. earned 10 → decrement 10; spent 20 → net -20 → increment 20.
+        $netPoints = (int) $reservation->loyaltyTransactions()->sum('points');
+
+        if ($netPoints !== 0) {
+            if ($netPoints > 0) {
+                Member::where('member_id', $reservation->member_id)
+                    ->decrement('loyalty_points', $netPoints);
+            } else {
+                Member::where('member_id', $reservation->member_id)
+                    ->increment('loyalty_points', abs($netPoints));
+            }
         }
 
         $reservation->loyaltyTransactions()->delete();
+        $reservation->reservedSlots()->delete();
         $reservation->delete();
     }
 
