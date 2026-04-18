@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Member;
+use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\EventService;
 use Carbon\Carbon;
@@ -26,7 +27,7 @@ class EventController extends Controller
 
     public function create()
     {
-        $tables = \App\Models\Table::all();
+        $tables = Table::all();
         $timeSlots = TimeSlot::all();
         return view('events.create', compact('tables', 'timeSlots'));
     }

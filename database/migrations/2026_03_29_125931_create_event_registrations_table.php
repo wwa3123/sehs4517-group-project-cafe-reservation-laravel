@@ -23,6 +23,7 @@ return new class extends Migration
             
             $table->foreign('event_id')->references('event_id')->on('events');
             $table->foreign('member_id')->references('member_id')->on('members');
+            $table->unique(['event_id', 'member_id']);
         });
     }
 
