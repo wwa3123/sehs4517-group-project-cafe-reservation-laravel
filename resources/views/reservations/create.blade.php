@@ -186,14 +186,6 @@
 @endsection
 @push('scripts')
     <script>
-        // ── Games data from server ──────────────────────────────────────────
-        const allGames = @json($games->map(fn($g) => [
-            'title'       => $g->title,
-            'category'    => $g->category,
-            'min_players' => $g->min_players,
-            'max_players' => $g->max_players,
-        ])->values());
-
         // ── Calendar ────────────────────────────────────────────────────────
         (function () {
             const dateInput    = document.getElementById('date');
