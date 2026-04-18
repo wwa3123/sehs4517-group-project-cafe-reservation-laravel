@@ -26,4 +26,6 @@ Route::middleware('auth')->prefix('reservations')->name('reservations.')->group(
 
     Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
 
+    Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy')->middleware('admin');
+
     });

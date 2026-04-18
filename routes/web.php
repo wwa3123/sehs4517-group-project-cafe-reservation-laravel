@@ -62,6 +62,9 @@ Route::prefix('events')->name('events.')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
         Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
+        Route::get('/{event}/edit', [EventController::class, 'edit'])->name('edit')->middleware('admin');
+        Route::put('/{event}', [EventController::class, 'update'])->name('update')->middleware('admin');
+        Route::delete('/{event}', [EventController::class, 'destroy'])->name('destroy')->middleware('admin');
         Route::post('/{event}/join', [EventController::class, 'join'])->name('join');
     }); // end auth
 

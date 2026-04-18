@@ -4,7 +4,17 @@
     <main class="max-w-5xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-6 flex items-center justify-between gap-4">
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">{{ $event->event_name }}</h1>
-            <a href="{{ route('events.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Back to Events</a>
+            <div class="flex items-center gap-2">
+                @if(auth()->user()?->role === 'admin')
+                    <a href="{{ route('events.edit', $event) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Edit</a>
+                    <form action="{{ route('events.destroy', $event) }}" method="POST" onsubmit="return confirm('Delete this event? This cannot be undone.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50">Delete</button>
+                    </form>
+                @endif
+                <a href="{{ route('events.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Back to Events</a>
+            </div>
         </div>
 
         @if(session('success'))

@@ -110,4 +110,31 @@ class EventController extends Controller
 
         return redirect()->route('events.show', $event)->with('success', 'Successfully joined event.');
     }
+
+    public function edit(Event $event)
+    {
+        return view('events.edit', compact('event'));
+    }
+
+    public function update(Request $request, Event $event)
+    {
+        $request->validate([
+            'event_name'         => ['required', 'string', 'max:255'],
+            'event_descriptions' => ['nullable', 'string', 'max:255'],
+            'event_fee'          => ['required', 'integer', 'min:0', 'max:99999'],
+            'max_participants'   => ['required', 'integer', 'min:1'],
+            'event_date'         => ['required', 'date'],
+        ]);
+
+        $this->eventService->updateEvent($event, $request->all());
+
+        return redirect()->route('events.show', $event)->with('success', 'Event updated successfully.');
+    }
+
+    public function destroy(Event $event)
+    {
+        $this->eventService->deleteEvent($event);
+
+        return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
+    }
 }

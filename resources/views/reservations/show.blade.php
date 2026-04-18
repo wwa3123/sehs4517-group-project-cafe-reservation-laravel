@@ -4,7 +4,16 @@
     <main class="max-w-3xl mx-auto px-4 py-10 sm:px-6 lg:px-8">
         <div class="mb-6 flex items-center justify-between gap-4">
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">Reservation #{{ $reservation->reservation_id }}</h1>
-            <a href="{{ route('reservations.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Back to List</a>
+            <div class="flex items-center gap-2">
+                @if(auth()->user()?->role === 'admin')
+                    <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Delete this reservation? This cannot be undone.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50">Delete</button>
+                    </form>
+                @endif
+                <a href="{{ route('reservations.index') }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Back to List</a>
+            </div>
         </div>
 
         <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6 sm:p-8 space-y-6">
