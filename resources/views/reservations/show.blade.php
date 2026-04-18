@@ -6,6 +6,7 @@
             <h1 class="text-2xl sm:text-3xl font-semibold tracking-tight">Reservation #{{ $reservation->reservation_id }}</h1>
             <div class="flex items-center gap-2">
                 @if(auth()->user()?->role === 'admin')
+                    <a href="{{ route('reservations.edit', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100">Edit</a>
                     <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Delete this reservation? This cannot be undone.')">
                         @csrf
                         @method('DELETE')

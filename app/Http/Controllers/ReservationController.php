@@ -4,11 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Models\Member;
 use App\Models\Reservation;
+use App\Models\ReservedSlot;
 use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\ReservationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ReservationController extends Controller
 {
@@ -102,6 +104,73 @@ class ReservationController extends Controller
 
         $reservation->load('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
         return view('reservations.show', compact('reservation'));
+    }
+
+    public function edit(Reservation $reservation)
+    {
+        $reservation->load('reservedSlots');
+        $tables             = Table::all();
+        $timeSlots          = TimeSlot::all();
+        $currentTableId     = $reservation->reservedSlots->first()?->table_id;
+        $currentTimeSlotIds = $reservation->reservedSlots->pluck('time_slots_id')->toArray();
+
+        return view('reservations.edit', compact('reservation', 'tables', 'timeSlots', 'currentTableId', 'currentTimeSlotIds'));
+    }
+
+    public function update(Request $request, Reservation $reservation)
+    {
+        $request->validate([
+            'date'            => ['required', 'date'],
+            'num_guests'      => [
+                'required', 'integer', 'min:1',
+                function ($attribute, $value, $fail) use ($request) {
+                    $table = Table::find($request->input('table_id'));
+                    if ($table && $value > $table->capacity) {
+                        $fail("Number of guests ({$value}) exceeds the table's maximum capacity of {$table->capacity}.");
+                    }
+                },
+            ],
+            'table_id'        => ['required', 'exists:tables,table_id'],
+            'time_slots_id'   => ['required', 'array', 'min:1'],
+            'time_slots_id.*' => [
+                'distinct',
+                'exists:time_slots,time_slots_id',
+                function ($attribute, $value, $fail) use ($request, $reservation) {
+                    $date    = Carbon::parse($request->input('date'))->toDateString();
+                    $tableId = (int) $request->input('table_id');
+                    $booked  = ReservedSlot::where('table_id', $tableId)
+                        ->where('time_slots_id', $value)
+                        ->whereHas('reservation', fn ($q) => $q
+                            ->whereDate('date', $date)
+                            ->where('reservation_id', '!=', $reservation->reservation_id)
+                        )->exists();
+                    if ($booked) {
+                        $timeSlot  = TimeSlot::find($value);
+                        $startTime = Carbon::parse($timeSlot->start_time)->format('h:i A');
+                        $fail("The selected table is not available at {$startTime}.");
+                    }
+                },
+            ],
+        ]);
+
+        DB::transaction(function () use ($request, $reservation) {
+            $reservation->update([
+                'date'       => $request->input('date'),
+                'num_guests' => $request->input('num_guests'),
+            ]);
+
+            $reservation->reservedSlots()->delete();
+            foreach ($request->input('time_slots_id') as $timeSlotId) {
+                ReservedSlot::create([
+                    'reservation_id' => $reservation->reservation_id,
+                    'table_id'       => $request->input('table_id'),
+                    'time_slots_id'  => $timeSlotId,
+                    'source_type'    => 'RESERVATION',
+                ]);
+            }
+        });
+
+        return redirect()->route('reservations.show', $reservation)->with('success', 'Reservation updated successfully.');
     }
 
     public function destroy(Reservation $reservation)

@@ -79,6 +79,7 @@
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('reservations.show', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">View</a>
                                         @if(auth()->user()?->role === 'admin')
+                                        <a href="{{ route('reservations.edit', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">Edit</a>
                                         <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Delete this reservation?')">
                                             @csrf
                                             @method('DELETE')
