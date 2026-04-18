@@ -62,17 +62,7 @@ Route::prefix('events')->name('events.')->group(function () {
     Route::middleware(['auth'])->group(function () {
         Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
         Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
-        Route::post('/{event}/join', function (Request $request, $event) {
-            abort_unless(auth()->check(), 403);
-
-            $eventModel = \App\Models\Event::findOrFail($event);
-
-            $request->merge([
-                'member_id' => auth()->id(),
-            ]);
-
-            return app(EventController::class)->join($request, $eventModel);
-        })->name('join');
+        Route::post('/{event}/join', [EventController::class, 'join'])->name('join');
     }); // end auth
 
     Route::get('/{event}', [EventController::class, 'show'])->name('show');

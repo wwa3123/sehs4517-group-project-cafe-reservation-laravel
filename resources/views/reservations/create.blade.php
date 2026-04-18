@@ -187,12 +187,12 @@
 @push('scripts')
     <script>
         // ── Games data from server ──────────────────────────────────────────
-        const allGames = {!! json_encode($games->map(fn($g) => [
+        const allGames = @json($games->map(fn($g) => [
             'title'       => $g->title,
             'category'    => $g->category,
             'min_players' => $g->min_players,
             'max_players' => $g->max_players,
-        ])->values()) !!};
+        ])->values());
 
         // ── Calendar ────────────────────────────────────────────────────────
         (function () {

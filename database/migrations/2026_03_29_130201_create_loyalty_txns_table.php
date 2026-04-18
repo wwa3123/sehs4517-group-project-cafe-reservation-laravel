@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('reference_id');
             $table->enum('reference_type', ['Reservation', 'Event']);
             $table->enum('txn_type', ['RESERVATION', 'EVENT']);
-            $table->decimal('points', 8, 2);
+            $table->integer('points');
             $table->string('descriptions')->nullable();
             $table->timestamps();
         });

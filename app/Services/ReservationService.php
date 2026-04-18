@@ -90,7 +90,7 @@ class ReservationService
             'email'           => $reservation->member->email,
             'date'            => Carbon::parse($reservation->date)->format('F j, Y'),
             'timeSlot'        => $timeLabel,
-            'table'           => optional($table)->table_name ?? 'Table',
+            'table'           => optional($table)->name ?? 'Table',
             'earnedTokens'    => $earnedTokens,
             'discountApplied' => $discountApplied,
             'gameSuggestions' => $gameSuggestions,

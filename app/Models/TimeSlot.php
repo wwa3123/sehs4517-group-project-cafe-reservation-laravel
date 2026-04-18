@@ -26,11 +26,6 @@ class TimeSlot extends Model
         'end_time',
     ];
 
-    protected $casts = [
-        'start_time' => 'datetime',
-        'end_time'   => 'datetime',
-    ];
-
     /**
      * Get the reserved slots for the time slot.
      */

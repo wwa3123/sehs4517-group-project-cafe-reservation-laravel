@@ -90,11 +90,10 @@ class EventController extends Controller
     public function join(Request $request, Event $event)
     {
         $validated = $request->validate([
-            'member_id'   => ['required', 'exists:members,member_id'],
             'num_tickets' => ['required', 'integer', 'min:1'],
         ]);
 
-        $result = $this->eventService->joinEvent($event, (int) $validated['member_id'], (int) $validated['num_tickets']);
+        $result = $this->eventService->joinEvent($event, (int) auth()->id(), (int) $validated['num_tickets']);
 
         if ($result !== true) {
             return back()->withErrors([$result['field'] => $result['message']])->withInput();

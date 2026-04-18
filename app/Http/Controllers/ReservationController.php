@@ -54,7 +54,14 @@ class ReservationController extends Controller
                 },
             ],
             'event_id'        => ['nullable', 'exists:events,event_id'],
-            'tokens_to_spend' => ['nullable', 'integer', 'min:0'],
+            'tokens_to_spend' => [
+                'nullable', 'integer', 'min:0',
+                function ($attribute, $value, $fail) {
+                    if ($value && $value > auth()->user()->loyalty_points) {
+                        $fail('You do not have enough loyalty tokens.');
+                    }
+                },
+            ],
             'date'            => ['required', 'date', 'after_or_equal:today'],
             'num_guests'      => [
                 'required', 'integer', 'min:1',
@@ -92,6 +99,10 @@ class ReservationController extends Controller
 
     public function show(Reservation $reservation)
     {
+        if (auth()->user()->role !== 'admin' && auth()->id() !== $reservation->member_id) {
+            abort(403);
+        }
+
         $reservation->load('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
         return view('reservations.show', compact('reservation'));
     }
