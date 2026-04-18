@@ -35,11 +35,6 @@ class LoginController extends Controller
                 $member->save();
             }
 
-            $request->session()->put('member_id', $member->member_id);
-            $request->session()->put('member_name', $member->first_name . ' ' . $member->last_name);
-            $request->session()->put('member_email', $member->email);
-            $request->session()->put('member_role', $member->role);
-
             return redirect()->route('reservations.index');
         } else {
             return back()->withErrors([

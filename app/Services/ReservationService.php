@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Game;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\ReservedSlot;

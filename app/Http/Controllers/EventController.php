@@ -38,7 +38,7 @@ class EventController extends Controller
             'event_descriptions'  => ['nullable', 'string', 'max:255'],
             'event_fee'           => ['required', 'integer', 'min:0'],
             'max_participants'    => ['required', 'integer', 'min:1'],
-            'event_date'          => ['required', 'date', 'after_or_equal:today'],
+            'event_date'          => ['required', 'date', 'after:now'],
             'num_guests'          => ['required', 'integer', 'min:1'],
             'table_id'            => ['required', 'array', 'min:1'],
             'table_id.*'          => ['exists:tables,table_id'],

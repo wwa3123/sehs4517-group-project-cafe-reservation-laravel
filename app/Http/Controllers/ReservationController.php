@@ -46,6 +46,7 @@ class ReservationController extends Controller
     {
         $request->validate([
             'member_id'       => ['required', 'exists:members,member_id'],
+            'event_id'        => ['nullable', 'exists:events,event_id'],
             'date'            => ['required', 'date', 'after_or_equal:today'],
             'num_guests'      => [
                 'required', 'integer', 'min:1',

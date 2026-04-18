@@ -58,7 +58,7 @@ Route::get('/api/booked-slots', function (Request $request) {
         ->pluck('time_slots_id');
 
     return response()->json($booked);
-})->middleware(['auth'])->name('api.booked-slots');
+})->middleware(['auth', 'throttle:30,1'])->name('api.booked-slots');
 
 Route::prefix('events')->name('events.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');

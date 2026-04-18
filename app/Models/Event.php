@@ -29,6 +29,10 @@ class Event extends Model
         'event_date',
     ];
 
+    protected $casts = [
+        'event_date' => 'datetime',
+    ];
+
     /**
      * Get the registrations for the event.
      */
