@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EventRegistration;
 use App\Models\Reservation;
 use Illuminate\Support\Facades\Auth;
 
@@ -24,6 +25,12 @@ class HistoryController extends Controller
             ->orderByDesc('date')
             ->paginate(10, ['*'], 'past_page');
 
-        return view('reservation_history', compact('upcoming', 'past'));
+        $eventRegistrations = EventRegistration::with('event')
+            ->where('member_id', $memberId)
+            ->whereHas('event')
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('reservation_history', compact('upcoming', 'past', 'eventRegistrations'));
     }
 }

@@ -2,54 +2,98 @@
 
 namespace App\Services;
 
+use App\Models\Game;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\ReservedSlot;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class ReservationService
 {
     private const TOKENS_PER_RESERVATION = 10;
-    private const DUMMY_MEMBER_EMAIL = 'event-reservation-dummy@system.local';
 
-    private function resolveMemberId(array $data): int
+    /**
+     * Check whether a time-slot is already booked for a given table and date.
+     */
+    public function isSlotBooked(int $tableId, int $timeSlotId, string $date): bool
     {
-        return (int) $data['member_id'];
+        return ReservedSlot::where('table_id', $tableId)
+            ->where('time_slots_id', $timeSlotId)
+            ->whereHas('reservation', fn ($q) => $q->whereDate('date', $date))
+            ->exists();
     }
 
-    public function createReservation(array $data)
+    public function createReservation(array $data): Reservation
     {
         return DB::transaction(function () use ($data) {
-            $memberId = $this->resolveMemberId($data);
+            $memberId = (int) $data['member_id'];
 
-            $reservationData = [
-                'member_id' => $memberId,
-                'date'      => $data['date'],
-                'num_guests'=> $data['num_guests'],
-            ];
-
-            $reservation = Reservation::create($reservationData);
+            $reservation = Reservation::create([
+                'member_id'  => $memberId,
+                'date'       => $data['date'],
+                'num_guests' => $data['num_guests'],
+            ]);
 
             foreach ($data['time_slots_id'] as $timeSlotId) {
                 ReservedSlot::create([
                     'reservation_id' => $reservation->reservation_id,
-                    'table_id' => $data['table_id'],
-                    'time_slots_id' => $timeSlotId,
-                    'source_type' => 'RESERVATION',
+                    'table_id'       => $data['table_id'],
+                    'time_slots_id'  => $timeSlotId,
+                    'source_type'    => 'RESERVATION',
                 ]);
             }
 
-            $earnedTokens = self::TOKENS_PER_RESERVATION;
+            $reservation->loyaltyTransactions()->create([
+                'txn_type'     => 'RESERVATION',
+                'points'       => self::TOKENS_PER_RESERVATION,
+                'descriptions' => 'Loyalty tokens earned from reservation #' . $reservation->reservation_id,
+            ]);
 
-                $reservation->loyaltyTransactions()->create([
-                    'txn_type' => 'RESERVATION',
-                    'points' => $earnedTokens,
-                    'descriptions' => 'Loyalty tokens earned from reservation #'.$reservation->reservation_id,
-                ]);
-
-                Member::where('member_id', $memberId)->increment('loyalty_points', $earnedTokens);
+            Member::where('member_id', $memberId)->increment('loyalty_points', self::TOKENS_PER_RESERVATION);
 
             return $reservation->load('member', 'loyaltyTransactions');
         });
+    }
+
+    /**
+     * Optionally apply a loyalty discount, then build the thank-you session data array.
+     */
+    public function buildThankYouData(Reservation $reservation, int $tokensToSpend): array
+    {
+        $earnedTokens    = (int) optional($reservation->loyaltyTransactions->first())->points;
+        $discountApplied = 0;
+
+        if ($tokensToSpend > 0 && $reservation->member) {
+            $reservation->load('member');
+            $applied = LoyaltyRedemptionService::applyDiscount($reservation, $reservation->member, $tokensToSpend);
+            if ($applied) {
+                $discountApplied = LoyaltyRedemptionService::calculateDiscount($tokensToSpend);
+            }
+        }
+
+        $reservation->member->refresh();
+
+        $firstSlot = optional($reservation->reservedSlots->load('timeSlot')->first())->timeSlot;
+        $table     = optional($reservation->reservedSlots->first())->table ?? $reservation->table;
+
+        $timeLabel = $firstSlot
+            ? Carbon::parse($firstSlot->start_time)->format('g:i A') . ' – ' . Carbon::parse($firstSlot->end_time)->format('g:i A')
+            : 'N/A';
+
+        $gameSuggestions = Game::inRandomOrder()->limit(3)->pluck('title')->toArray();
+        if (empty($gameSuggestions)) {
+            $gameSuggestions = ['Catan', 'Ticket to Ride', 'Codenames'];
+        }
+
+        return [
+            'email'           => $reservation->member->email,
+            'date'            => Carbon::parse($reservation->date)->format('F j, Y'),
+            'timeSlot'        => $timeLabel,
+            'table'           => optional($table)->table_name ?? 'Table',
+            'earnedTokens'    => $earnedTokens,
+            'discountApplied' => $discountApplied,
+            'gameSuggestions' => $gameSuggestions,
+        ];
     }
 }

@@ -39,8 +39,13 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">${{ number_format($event->event_fee / 100, 2) }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $event->max_participants }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $event->available_tickets }}</td>
-                                <td class="px-4 py-3 text-sm">
+                                <td class="px-4 py-3 text-sm flex items-center gap-2">
                                     <a href="{{ route('events.show', $event) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">View & Join</a>
+                                    @auth
+                                    @if($joinedEventIds->has($event->event_id))
+                                    <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">Joined</span>
+                                    @endif
+                                    @endauth
                                 </td>
                             </tr>
                         @empty

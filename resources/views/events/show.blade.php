@@ -58,6 +58,13 @@
                 <h2 class="text-lg font-semibold text-gray-900">Join This Event</h2>
 
                 @auth
+                @if($userRegistration && auth()->user()?->role !== 'admin')
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700 text-sm space-y-1">
+                    <p class="font-semibold">You have joined this event</p>
+                    <p>Tickets: {{ $userRegistration->num_tickets }}</p>
+                    <p>Status: {{ $userRegistration->payment_status }}</p>
+                </div>
+                @else
                 <form action="{{ route('events.join', $event) }}" method="POST" class="space-y-4">
                     @csrf
 
@@ -85,6 +92,7 @@
                         {{ $availableTickets < 1 ? 'Sold Out' : 'Join Event' }}
                     </button>
                 </form>
+                @endif
                 @else
                 <p class="text-sm text-gray-600">Please <a href="{{ route('login') }}" class="font-medium text-indigo-600 hover:underline">log in</a> to join this event.</p>
                 @endauth
