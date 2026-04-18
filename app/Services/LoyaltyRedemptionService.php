@@ -43,6 +43,11 @@ class LoyaltyRedemptionService
      */
     public static function applyDiscount(Reservation $reservation, Member $member, int $tokensToSpend): bool
     {
+        // Ensure the authenticated user can only redeem their own tokens
+        if (auth()->check() && auth()->id() !== $member->member_id) {
+            return false;
+        }
+
         if ($tokensToSpend <= 0 || $tokensToSpend > $member->loyalty_points) {
             return false;
         }
