@@ -21,9 +21,9 @@ return new class extends Migration
             $table->unsignedBigInteger('table_id');
             $table->timestamps();
 
-            $table->foreign('time_slots_id')->references('time_slots_id')->on('time_slots');
-            $table->foreign('reservation_id')->references('reservation_id')->on('reservations');
-            $table->foreign('table_id')->references('table_id')->on('tables');
+            $table->foreign('time_slots_id')->references('time_slots_id')->on('time_slots')->onDelete('cascade');
+            $table->foreign('reservation_id')->references('reservation_id')->on('reservations')->onDelete('cascade');
+            $table->foreign('table_id')->references('table_id')->on('tables')->onDelete('cascade');
         });
     }
 

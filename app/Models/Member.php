@@ -69,7 +69,7 @@ class Member extends Authenticatable
             'phone' => $data['phone'],
             'email' => $data['email'],
             'password_hash' => Hash::make($data['password']),
-            'subscribe_events' => request()->boolean('subscribe'),
+            'subscribe_events' => isset($data['subscribe_events']) ? (bool) $data['subscribe_events'] : false,
         ]);
     }
 

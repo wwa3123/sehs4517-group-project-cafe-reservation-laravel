@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Game;
 use App\Models\Member;
 use App\Models\Reservation;
 use App\Models\ReservedSlot;
@@ -71,7 +72,7 @@ class ReservationService
             }
         }
 
-        $reservation->member->refresh();
+        $reservation->member?->refresh();
 
         $firstSlot = optional($reservation->reservedSlots->load('timeSlot')->first())->timeSlot;
         $table     = optional($reservation->reservedSlots->first())->table ?? $reservation->table;
@@ -89,7 +90,7 @@ class ReservationService
             'email'           => $reservation->member->email,
             'date'            => Carbon::parse($reservation->date)->format('F j, Y'),
             'timeSlot'        => $timeLabel,
-            'table'           => optional($table)->table_name ?? 'Table',
+            'table'           => optional($table)->name ?? 'Table',
             'earnedTokens'    => $earnedTokens,
             'discountApplied' => $discountApplied,
             'gameSuggestions' => $gameSuggestions,

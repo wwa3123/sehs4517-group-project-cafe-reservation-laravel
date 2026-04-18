@@ -112,7 +112,7 @@
     <div class="history-tabs">
         <button class="history-tab active" data-tab="upcoming">Upcoming <span class="badge badge-upcoming">{{ $upcoming->total() }}</span></button>
         <button class="history-tab" data-tab="past">Past <span class="badge badge-past">{{ $past->total() }}</span></button>
-        <button class="history-tab" data-tab="events">Events <span class="badge badge-upcoming">{{ $eventRegistrations->count() }}</span></button>
+        <button class="history-tab" data-tab="events">Events <span class="badge badge-upcoming">{{ $eventRegistrations->total() }}</span></button>
     </div>
 
     {{-- Upcoming --}}
@@ -219,8 +219,11 @@
                 <div class="empty-message">
                     No event registrations. <a href="{{ route('events.index') }}" style="color:var(--accent,#4c9f2f);">Browse events</a>
                 </div>
-            @endif
-        </div>
+            @endif            @if($eventRegistrations->hasPages())
+                <div style="padding: 0.75rem 1rem; border-top: 1px solid #e5e7eb;">
+                    {{ $eventRegistrations->links() }}
+                </div>
+            @endif        </div>
     </div>
 </div>
 @push('scripts')

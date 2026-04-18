@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
 use App\Models\Game;
 use App\Models\Member;
 use App\Models\Reservation;
@@ -25,28 +24,43 @@ class ReservationController extends Controller
             $query->where('member_id', $user->member_id);
         }
 
-        $reservations = $query->get();
+        $reservations = $query->paginate(15);
         return view('reservations.index', compact('reservations'));
     }
 
     public function create(Request $request)
     {
         $members   = Member::where('role', '!=', 'system')->orWhereNull('role')->get();
-        $events    = Event::orderBy('event_date')->get();
         $tables    = Table::all();
         $timeSlots = TimeSlot::all();
         $games     = Game::all();
-        $prefillEventId = $request->query('event_id');
-        $prefillDate    = $request->query('date');
+        $prefillDate = $request->query('date');
 
-        return view('reservations.create', compact('members', 'events', 'tables', 'timeSlots', 'games', 'prefillEventId', 'prefillDate'));
+        return view('reservations.create', compact('members', 'tables', 'timeSlots', 'games', 'prefillDate'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'member_id'       => ['required', 'exists:members,member_id'],
+            'member_id'       => [
+                'required', 'exists:members,member_id',
+                function ($attribute, $value, $fail) {
+                    if (auth()->user()->role !== 'admin' && (int) $value !== auth()->id()) {
+                        $fail('You can only make reservations for yourself.');
+                    }
+                },
+            ],
             'event_id'        => ['nullable', 'exists:events,event_id'],
+            'tokens_to_spend' => [
+                'nullable', 'integer', 'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    $memberId = (int) $request->input('member_id');
+                    $member = \App\Models\Member::find($memberId);
+                    if ($value && $member && $value > $member->loyalty_points) {
+                        $fail('The selected member does not have enough loyalty tokens.');
+                    }
+                },
+            ],
             'date'            => ['required', 'date', 'after_or_equal:today'],
             'num_guests'      => [
                 'required', 'integer', 'min:1',
@@ -84,6 +98,10 @@ class ReservationController extends Controller
 
     public function show(Reservation $reservation)
     {
+        if (auth()->user()->role !== 'admin' && auth()->id() !== $reservation->member_id) {
+            abort(403);
+        }
+
         $reservation->load('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
         return view('reservations.show', compact('reservation'));
     }

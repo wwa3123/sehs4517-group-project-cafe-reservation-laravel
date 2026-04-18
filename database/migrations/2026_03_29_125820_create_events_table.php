@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('event_descriptions')->nullable();
             $table->integer('event_fee');
             $table->integer('max_participants');
-            $table->string('event_date');
+            $table->dateTime('event_date');
             $table->timestamps();
         });
     }

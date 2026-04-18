@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Event;
 use App\Models\Member;
+use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\EventService;
 use Carbon\Carbon;
@@ -26,7 +27,7 @@ class EventController extends Controller
 
     public function create()
     {
-        $tables = \App\Models\Table::all();
+        $tables = Table::all();
         $timeSlots = TimeSlot::all();
         return view('events.create', compact('tables', 'timeSlots'));
     }
@@ -36,7 +37,7 @@ class EventController extends Controller
         $request->validate([
             'event_name'          => ['required', 'string', 'max:255'],
             'event_descriptions'  => ['nullable', 'string', 'max:255'],
-            'event_fee'           => ['required', 'integer', 'min:0'],
+            'event_fee'           => ['required', 'integer', 'min:0', 'max:99999'],
             'max_participants'    => ['required', 'integer', 'min:1'],
             'event_date'          => ['required', 'date', 'after:now'],
             'num_guests'          => ['required', 'integer', 'min:1'],
@@ -89,12 +90,19 @@ class EventController extends Controller
 
     public function join(Request $request, Event $event)
     {
-        $validated = $request->validate([
-            'member_id'   => ['required', 'exists:members,member_id'],
-            'num_tickets' => ['required', 'integer', 'min:1'],
-        ]);
+        $rules = ['num_tickets' => ['required', 'integer', 'min:1']];
 
-        $result = $this->eventService->joinEvent($event, (int) $validated['member_id'], (int) $validated['num_tickets']);
+        if (auth()->user()->role === 'admin') {
+            $rules['member_id'] = ['required', 'exists:members,member_id'];
+        }
+
+        $validated = $request->validate($rules);
+
+        $memberId = auth()->user()->role === 'admin'
+            ? (int) $validated['member_id']
+            : (int) auth()->id();
+
+        $result = $this->eventService->joinEvent($event, $memberId, (int) $validated['num_tickets']);
 
         if ($result !== true) {
             return back()->withErrors([$result['field'] => $result['message']])->withInput();

@@ -23,8 +23,8 @@ class ProfileUpdateRequest extends FormRequest {
         return [
             'first_name' => 'required',
             'last_name' => 'required',
-            'address' => 'required',
-            'phone' => 'required',
+            'address' => ['required', 'string', 'max:255'],
+            'phone' => ['required', 'string', 'regex:/^[\+\d\s\-\(\)]{7,20}$/'],
             'email' => 'required|email|unique:members,email,' . $this->user()->member_id . ',member_id',
         ];
     }
