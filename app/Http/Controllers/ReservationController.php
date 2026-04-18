@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Event;
 use App\Models\Game;
 use App\Models\Member;
 use App\Models\Reservation;
@@ -32,14 +31,12 @@ class ReservationController extends Controller
     public function create(Request $request)
     {
         $members   = Member::where('role', '!=', 'system')->orWhereNull('role')->get();
-        $events    = Event::orderBy('event_date')->get();
         $tables    = Table::all();
         $timeSlots = TimeSlot::all();
         $games     = Game::all();
-        $prefillEventId = $request->query('event_id');
-        $prefillDate    = $request->query('date');
+        $prefillDate = $request->query('date');
 
-        return view('reservations.create', compact('members', 'events', 'tables', 'timeSlots', 'games', 'prefillEventId', 'prefillDate'));
+        return view('reservations.create', compact('members', 'tables', 'timeSlots', 'games', 'prefillDate'));
     }
 
     public function store(Request $request)

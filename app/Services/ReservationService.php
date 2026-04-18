@@ -72,7 +72,7 @@ class ReservationService
             }
         }
 
-        $reservation->member->refresh();
+        $reservation->member?->refresh();
 
         $firstSlot = optional($reservation->reservedSlots->load('timeSlot')->first())->timeSlot;
         $table     = optional($reservation->reservedSlots->first())->table ?? $reservation->table;

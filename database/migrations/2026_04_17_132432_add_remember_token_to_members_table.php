@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('members', function (Blueprint $table) {
-            $table->rememberToken()->after('loyalty_points');
+            $table->dropColumn('remember_token');
         });
     }
 };

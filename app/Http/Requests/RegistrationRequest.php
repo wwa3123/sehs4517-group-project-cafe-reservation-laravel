@@ -26,6 +26,7 @@ class RegistrationRequest extends FormRequest {
             'phone' => ['required', 'string', 'regex:/^[\+\d\s\-\(\)]{7,20}$/'],
             'email' => 'required|email|unique:members,email',
             'password' => 'required|min:8|confirmed',
+            'subscribe_events' => ['nullable', 'boolean'],
         ];
     }
 
