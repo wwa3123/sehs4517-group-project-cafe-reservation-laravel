@@ -49,12 +49,20 @@ Route::middleware('auth')->group(function () {
     // Returns booked time_slot IDs for a given table + date (used by JS in create forms)
     Route::get('/api/booked-slots', function (Request $request) {
         $request->validate([
-            'table_id' => ['required', 'integer'],
-            'date'     => ['required', 'date'],
+            'table_id'               => ['required', 'integer'],
+            'date'                   => ['required', 'date'],
+            'exclude_reservation_id' => ['nullable', 'integer'],
         ]);
 
+        $excludeId = $request->input('exclude_reservation_id');
+
         $booked = ReservedSlot::where('table_id', $request->input('table_id'))
-            ->whereHas('reservation', fn ($q) => $q->whereDate('date', $request->input('date')))
+            ->whereHas('reservation', function ($q) use ($request, $excludeId) {
+                $q->whereDate('date', $request->input('date'));
+                if ($excludeId) {
+                    $q->where('reservation_id', '!=', $excludeId);
+                }
+            })
             ->pluck('time_slots_id');
 
         return response()->json($booked);
@@ -67,6 +75,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/create', [ReservationController::class, 'create'])->name('create');
         Route::post('/', [ReservationController::class, 'store'])->name('store');
         Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
+        Route::get('/{reservation}/edit', [ReservationController::class, 'edit'])->name('edit')->middleware('admin');
+        Route::put('/{reservation}', [ReservationController::class, 'update'])->name('update')->middleware('admin');
         Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy')->middleware('admin');
     });
 
