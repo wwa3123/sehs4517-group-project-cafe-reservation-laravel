@@ -66,21 +66,22 @@ Route::get('/api/booked-slots', function (Request $request) {
 
 Route::prefix('events')->name('events.')->group(function () {
     Route::get('/', [EventController::class, 'index'])->name('index');
-    Route::get('/{event}', [EventController::class, 'show'])->name('show');
 
     Route::middleware(['auth'])->group(function () {
-    Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
-    Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
-    Route::post('/{event}/join', function (Request $request, $event) {
-        abort_unless(auth()->check(), 403);
+        Route::get('/create', [EventController::class, 'create'])->name('create')->middleware('admin');
+        Route::post('/', [EventController::class, 'store'])->name('store')->middleware('admin');
+        Route::post('/{event}/join', function (Request $request, $event) {
+            abort_unless(auth()->check(), 403);
 
-        $eventModel = \App\Models\Event::findOrFail($event);
+            $eventModel = \App\Models\Event::findOrFail($event);
 
-        $request->merge([
-            'member_id' => auth()->id(),
-        ]);
+            $request->merge([
+                'member_id' => auth()->id(),
+            ]);
 
-        return app(EventController::class)->join($request, $eventModel);
-    })->name('join');
+            return app(EventController::class)->join($request, $eventModel);
+        })->name('join');
     }); // end auth
+
+    Route::get('/{event}', [EventController::class, 'show'])->name('show');
 }); // end events prefix
