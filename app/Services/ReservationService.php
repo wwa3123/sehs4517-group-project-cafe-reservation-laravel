@@ -31,6 +31,7 @@ class ReservationService
 
             $reservation = Reservation::create([
                 'member_id'  => $memberId,
+                'event_id'   => isset($data['event_id']) ? (int) $data['event_id'] : null,
                 'date'       => $data['date'],
                 'num_guests' => $data['num_guests'],
             ]);
@@ -54,6 +55,38 @@ class ReservationService
 
             return $reservation->load('member', 'loyaltyTransactions');
         });
+    }
+
+    public function updateReservation(Reservation $reservation, array $data): void
+    {
+        DB::transaction(function () use ($reservation, $data) {
+            $reservation->update([
+                'date'       => $data['date'],
+                'num_guests' => $data['num_guests'],
+            ]);
+
+            $reservation->reservedSlots()->delete();
+            foreach ($data['time_slots_id'] as $timeSlotId) {
+                ReservedSlot::create([
+                    'reservation_id' => $reservation->reservation_id,
+                    'table_id'       => $data['table_id'],
+                    'time_slots_id'  => $timeSlotId,
+                    'source_type'    => 'RESERVATION',
+                ]);
+            }
+        });
+    }
+
+    public function deleteReservation(Reservation $reservation): void
+    {
+        $totalPoints = (int) $reservation->loyaltyTransactions()->sum('points');
+        if ($totalPoints > 0) {
+            Member::where('member_id', $reservation->member_id)
+                ->decrement('loyalty_points', $totalPoints);
+        }
+
+        $reservation->loyaltyTransactions()->delete();
+        $reservation->delete();
     }
 
     /**

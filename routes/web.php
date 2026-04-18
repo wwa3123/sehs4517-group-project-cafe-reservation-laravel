@@ -52,15 +52,31 @@ Route::middleware('auth')->group(function () {
             'table_id'               => ['required', 'integer'],
             'date'                   => ['required', 'date'],
             'exclude_reservation_id' => ['nullable', 'integer'],
+            'exclude_event_id'       => ['nullable', 'integer'],
         ]);
 
-        $excludeId = $request->input('exclude_reservation_id');
+        $excludeId      = $request->input('exclude_reservation_id');
+        $excludeEventId = $request->input('exclude_event_id');
+
+        // Collect reservation IDs that belong to the excluded event's system member
+        $excludeEventReservationIds = [];
+        if ($excludeEventId) {
+            $systemMember = \App\Models\Member::where('email', 'event-' . $excludeEventId . '@system.local')->first();
+            if ($systemMember) {
+                $excludeEventReservationIds = \App\Models\Reservation::where('member_id', $systemMember->member_id)
+                    ->pluck('reservation_id')
+                    ->toArray();
+            }
+        }
 
         $booked = ReservedSlot::where('table_id', $request->input('table_id'))
-            ->whereHas('reservation', function ($q) use ($request, $excludeId) {
+            ->whereHas('reservation', function ($q) use ($request, $excludeId, $excludeEventReservationIds) {
                 $q->whereDate('date', $request->input('date'));
                 if ($excludeId) {
                     $q->where('reservation_id', '!=', $excludeId);
+                }
+                if (!empty($excludeEventReservationIds)) {
+                    $q->whereNotIn('reservation_id', $excludeEventReservationIds);
                 }
             })
             ->pluck('time_slots_id');

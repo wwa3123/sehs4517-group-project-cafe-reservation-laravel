@@ -37,7 +37,14 @@
                         @forelse($reservations as $reservation)
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-700">#{{ $reservation->reservation_id }}</td>
-                                <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $reservation->member->first_name }} {{ $reservation->member->last_name }}</td>
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                                    @if($reservation->member?->role === 'system')
+                                        {{ $reservation->event?->event_name ?? $reservation->member->first_name }}
+                                        <span class="ml-1 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Event</span>
+                                    @else
+                                        {{ $reservation->member->first_name }} {{ $reservation->member->last_name }}
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('M j, Y') }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     {{ $reservation->event?->event_name ?? 'None' }}
@@ -79,12 +86,16 @@
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('reservations.show', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">View</a>
                                         @if(auth()->user()?->role === 'admin')
+                                        @if($reservation->member?->role !== 'system')
                                         <a href="{{ route('reservations.edit', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">Edit</a>
+                                        @endif
+                                        @if($reservation->member?->role !== 'system')
                                         <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Delete this reservation?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50">Delete</button>
                                         </form>
+                                        @endif
                                         @endif
                                     </div>
                                 </td>
