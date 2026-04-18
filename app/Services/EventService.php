@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Event;
 use App\Models\EventRegistration;
 use App\Models\Member;
+use App\Models\Reservation;
 use App\Models\ReservedSlot;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -151,6 +152,59 @@ class EventService
             ]);
 
             return true;
+        });
+    }
+
+    /**
+     * Update basic event details. If the event date changes, the linked system reservations are updated too.
+     */
+    public function updateEvent(Event $event, array $data): Event
+    {
+        DB::transaction(function () use ($event, $data) {
+            $oldDate = Carbon::parse($event->event_date)->toDateString();
+            $newDate = Carbon::parse($data['event_date'])->toDateString();
+
+            $event->update([
+                'event_name'         => $data['event_name'],
+                'event_descriptions' => $data['event_descriptions'] ?? null,
+                'event_fee'          => $data['event_fee'],
+                'max_participants'   => $data['max_participants'],
+                'event_date'         => $data['event_date'],
+            ]);
+
+            if ($oldDate !== $newDate) {
+                $systemMember = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
+                if ($systemMember) {
+                    Reservation::where('member_id', $systemMember->member_id)
+                        ->update(['date' => $newDate]);
+                }
+            }
+        });
+
+        return $event->fresh();
+    }
+
+    /**
+     * Delete an event and all associated system reservations and the system member.
+     * Event registrations are removed via cascade.
+     */
+    public function deleteEvent(Event $event): void
+    {
+        DB::transaction(function () use ($event) {
+            $systemMember = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
+
+            if ($systemMember) {
+                $reservations = Reservation::where('member_id', $systemMember->member_id)->get();
+                foreach ($reservations as $reservation) {
+                    $reservation->loyaltyTransactions()->delete();
+                    $reservation->reservedSlots()->delete();
+                    $reservation->delete();
+                }
+                $systemMember->delete();
+            }
+
+            // event_registrations cascade from event_id FK
+            $event->delete();
         });
     }
 }

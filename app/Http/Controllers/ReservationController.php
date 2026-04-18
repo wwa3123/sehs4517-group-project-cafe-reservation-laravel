@@ -103,4 +103,22 @@ class ReservationController extends Controller
         $reservation->load('member', 'event', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
         return view('reservations.show', compact('reservation'));
     }
+
+    public function destroy(Reservation $reservation)
+    {
+        abort_unless(auth()->user()->role === 'admin', 403);
+
+        // Reverse loyalty points earned by this reservation
+        $totalPoints = (int) $reservation->loyaltyTransactions()->sum('points');
+        if ($totalPoints > 0) {
+            Member::where('member_id', $reservation->member_id)
+                ->decrement('loyalty_points', $totalPoints);
+        }
+
+        $reservation->loyaltyTransactions()->delete();
+        // reserved_slots cascade from reservation_id FK
+        $reservation->delete();
+
+        return redirect()->route('reservations.index')->with('success', 'Reservation deleted successfully.');
+    }
 }

@@ -45,6 +45,14 @@
                                     @if($joinedEventIds->has($event->event_id))
                                     <span class="inline-flex items-center rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">Joined</span>
                                     @endif
+                                    @if(auth()->user()?->role === 'admin')
+                                    <a href="{{ route('events.edit', $event) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">Edit</a>
+                                    <form action="{{ route('events.destroy', $event) }}" method="POST" onsubmit="return confirm('Delete this event?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50">Delete</button>
+                                    </form>
+                                    @endif
                                     @endauth
                                 </td>
                             </tr>
