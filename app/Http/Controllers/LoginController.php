@@ -28,6 +28,13 @@ class LoginController extends Controller
             $request->session()->regenerate();
 
             $member = Auth::user();
+
+            // If remember me was not checked, clear any stored remember token
+            if (!$request->boolean('remember')) {
+                $member->setRememberToken(null);
+                $member->save();
+            }
+
             $request->session()->put('member_id', $member->member_id);
             $request->session()->put('member_name', $member->first_name . ' ' . $member->last_name);
             $request->session()->put('member_email', $member->email);
@@ -44,10 +51,16 @@ class LoginController extends Controller
     // logout function
     public function logout(Request $request)
     {
+        $user = Auth::user();
+        if ($user) {
+            $user->setRememberToken(null);
+            $user->save();
+        }
+
         Auth::logout();
         $request->session()->invalidate();
-        $request->session()->regenerateToken();        
+        $request->session()->regenerateToken();
 
-        return redirect()->route('login');  
+        return redirect()->route('login');
     }
 }
