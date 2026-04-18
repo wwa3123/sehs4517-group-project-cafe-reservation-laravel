@@ -45,8 +45,16 @@ class ReservationController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'member_id'       => ['required', 'exists:members,member_id'],
+            'member_id'       => [
+                'required', 'exists:members,member_id',
+                function ($attribute, $value, $fail) {
+                    if (auth()->user()->role !== 'admin' && (int) $value !== auth()->id()) {
+                        $fail('You can only make reservations for yourself.');
+                    }
+                },
+            ],
             'event_id'        => ['nullable', 'exists:events,event_id'],
+            'tokens_to_spend' => ['nullable', 'integer', 'min:0'],
             'date'            => ['required', 'date', 'after_or_equal:today'],
             'num_guests'      => [
                 'required', 'integer', 'min:1',

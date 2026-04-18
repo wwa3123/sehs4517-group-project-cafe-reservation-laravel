@@ -36,7 +36,7 @@ class EventController extends Controller
         $request->validate([
             'event_name'          => ['required', 'string', 'max:255'],
             'event_descriptions'  => ['nullable', 'string', 'max:255'],
-            'event_fee'           => ['required', 'integer', 'min:0'],
+            'event_fee'           => ['required', 'integer', 'min:0', 'max:99999'],
             'max_participants'    => ['required', 'integer', 'min:1'],
             'event_date'          => ['required', 'date', 'after:now'],
             'num_guests'          => ['required', 'integer', 'min:1'],

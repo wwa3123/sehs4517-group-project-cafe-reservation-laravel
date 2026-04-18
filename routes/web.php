@@ -18,10 +18,6 @@ Route::get('/menu', [MenuController::class, 'index'])->name('menu');
 Route::get('/register', [RegistrationController::class, 'show'])->name('register');
 Route::post('/register', [RegistrationController::class, 'register']);
 Route::get('/check-email', [RegistrationController::class, 'checkEmail']);
-Route::post('/forget-old', function() {
-    session()->forget('_old_input');
-    return response()->json(['status' => 'success']);
-});
 
 
 Route::middleware(['auth'])->group(function() {

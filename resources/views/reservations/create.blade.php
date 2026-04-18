@@ -141,11 +141,6 @@
                     </select>
                 </div>
 
-                <div>
-                    <label for="notes" class="mb-1.5 block text-sm font-medium text-gray-700">Additional Notes</label>
-                    <textarea name="notes" id="notes" rows="4" class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500" placeholder="Optional notes...">{{ old('notes') }}</textarea>
-                </div>
-
                 {{-- Loyalty token redemption --}}
                 @php $loyaltyPoints = auth()->user()->loyalty_points ?? 0; @endphp
                 @if($loyaltyPoints > 0)

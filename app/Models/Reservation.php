@@ -13,6 +13,7 @@ class Reservation extends Model
 
     protected $fillable = [
         'member_id',
+        'event_id',
         'date',
         'num_guests',
         'discount_tokens_used',
@@ -20,7 +21,8 @@ class Reservation extends Model
     ];
 
     protected $casts = [
-        'date' => 'datetime',
+        'date'                 => 'datetime',
+        'discount_amount_saved' => 'decimal:2',
     ];
 
     /**
