@@ -57,5 +57,10 @@
                 </table>
             </div>
         </div>
+        @if($events->hasPages())
+            <div class="px-4 py-3 border-t border-gray-200">
+                {{ $events->links() }}
+            </div>
+        @endif
     </main>
 @endsection

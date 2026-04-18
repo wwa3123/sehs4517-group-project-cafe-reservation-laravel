@@ -7,6 +7,7 @@ use App\Models\EventRegistration;
 use App\Models\Member;
 use App\Models\ReservedSlot;
 use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -18,19 +19,22 @@ class EventService
     /**
      * Fetch all events with ticket counts and available slots.
      */
-    public function listEvents(): Collection
+    public function listEvents(): LengthAwarePaginator
     {
-        return Event::withSum([
+        $paginator = Event::withSum([
             'registrations as registered_tickets' => fn ($q) => $q->where('payment_status', '!=', 'CANCELLED'),
         ], 'num_tickets')
             ->orderBy('event_date')
-            ->get()
-            ->map(function (Event $event) {
-                $registered = (int) ($event->registered_tickets ?? 0);
-                $event->registered_tickets = $registered;
-                $event->available_tickets  = max(0, (int) $event->max_participants - $registered);
-                return $event;
-            });
+            ->paginate(15);
+
+        $paginator->getCollection()->transform(function (Event $event) {
+            $registered = (int) ($event->registered_tickets ?? 0);
+            $event->registered_tickets = $registered;
+            $event->available_tickets  = max(0, (int) $event->max_participants - $registered);
+            return $event;
+        });
+
+        return $paginator;
     }
 
     /**

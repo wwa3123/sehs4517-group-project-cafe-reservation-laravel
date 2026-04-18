@@ -88,5 +88,10 @@
                 </table>
             </div>
         </div>
+        @if($reservations->hasPages())
+            <div class="px-4 py-3 border-t border-gray-200">
+                {{ $reservations->links() }}
+            </div>
+        @endif
     </main>
 @endsection

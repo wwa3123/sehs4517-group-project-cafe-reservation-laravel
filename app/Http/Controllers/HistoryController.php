@@ -29,7 +29,7 @@ class HistoryController extends Controller
             ->where('member_id', $memberId)
             ->whereHas('event')
             ->orderByDesc('created_at')
-            ->get();
+            ->paginate(10, ['*'], 'events_page');
 
         return view('reservation_history', compact('upcoming', 'past', 'eventRegistrations'));
     }

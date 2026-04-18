@@ -24,7 +24,7 @@ class ReservationController extends Controller
             $query->where('member_id', $user->member_id);
         }
 
-        $reservations = $query->get();
+        $reservations = $query->paginate(15);
         return view('reservations.index', compact('reservations'));
     }
 
