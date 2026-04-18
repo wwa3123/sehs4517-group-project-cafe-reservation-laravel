@@ -105,6 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::put('/{event}', [EventController::class, 'update'])->name('update')->middleware('admin');
         Route::delete('/{event}', [EventController::class, 'destroy'])->name('destroy')->middleware('admin');
         Route::post('/{event}/join', [EventController::class, 'join'])->name('join');
+        Route::delete('/{event}/registrations/{registration}', [EventController::class, 'removeRegistration'])->name('registrations.destroy')->middleware('admin');
     });
 });
 

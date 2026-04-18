@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreEventRequest;
 use App\Http\Requests\UpdateEventRequest;
 use App\Models\Event;
+use App\Models\EventRegistration;
 use App\Models\Member;
 use App\Models\Table;
 use App\Models\TimeSlot;
@@ -109,5 +110,14 @@ class EventController extends Controller
         $this->eventService->deleteEvent($event);
 
         return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
+    }
+
+    public function removeRegistration(Event $event, EventRegistration $registration)
+    {
+        abort_if($registration->event_id !== $event->event_id, 404);
+
+        $registration->delete();
+
+        return redirect()->route('events.show', $event)->with('success', 'Registration removed.');
     }
 }
