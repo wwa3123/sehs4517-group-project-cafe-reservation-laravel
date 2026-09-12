@@ -31,7 +31,7 @@ class EventService
         $paginator->getCollection()->transform(function (Event $event) {
             $registered = (int) ($event->registered_tickets ?? 0);
             $event->registered_tickets = $registered;
-            $event->available_tickets  = max(0, (int) $event->max_participants - $registered);
+            $event->available_tickets = max(0, (int) $event->max_participants - $registered);
             return $event;
         });
 
@@ -57,7 +57,7 @@ class EventService
         return DB::transaction(function () use ($data) {
             $event = Event::create([
                 'event_name'          => $data['event_name'],
-                'event_descriptions'  => $data['event_descriptions'] ?? null,
+                'event_descriptions' => $data['event_descriptions'] ?? null,
                 'event_fee'           => $data['event_fee'],
                 'max_participants'    => $data['max_participants'],
                 'event_date'          => $data['event_date'],
@@ -97,7 +97,7 @@ class EventService
     {
         return ReservedSlot::where('table_id', $tableId)
             ->where('time_slots_id', $timeSlotId)
-            ->whereHas('reservation', fn ($q) => $q->whereDate('date', $date))
+            ->where('reservation_date', Carbon::parse($date)->toDateString())
             ->exists();
     }
 
@@ -125,28 +125,34 @@ class EventService
      */
     public function joinEvent(Event $event, int $memberId, int $numTickets): true|array
     {
-        $alreadyJoined = EventRegistration::where('event_id', $event->event_id)
-            ->where('member_id', $memberId)
-            ->where('payment_status', '!=', 'CANCELLED')
-            ->exists();
-
-        if ($alreadyJoined) {
-            return ['field' => 'member_id', 'message' => 'This member has already joined this event.'];
-        }
-
         return DB::transaction(function () use ($event, $memberId, $numTickets) {
-            $registered = (int) EventRegistration::where('event_id', $event->event_id)
+            // Serializing registrations on the event row prevents simultaneous
+            // capacity checks from admitting more tickets than are available.
+            $lockedEvent = Event::query()
+                ->lockForUpdate()
+                ->findOrFail($event->event_id);
+
+            $alreadyJoined = EventRegistration::where('event_id', $lockedEvent->event_id)
+                ->where('member_id', $memberId)
+                ->where('payment_status', '!=', 'CANCELLED')
+                ->exists();
+
+            if ($alreadyJoined) {
+                return ['field' => 'member_id', 'message' => 'This member has already joined this event.'];
+            }
+
+            $registered = (int) EventRegistration::where('event_id', $lockedEvent->event_id)
                 ->where('payment_status', '!=', 'CANCELLED')
                 ->sum('num_tickets');
 
-            $available = (int) $event->max_participants - $registered;
+            $available = (int) $lockedEvent->max_participants - $registered;
 
             if ($numTickets > $available) {
                 return ['field' => 'num_tickets', 'message' => 'Not enough available tickets for this event.'];
             }
 
             EventRegistration::create([
-                'event_id'       => $event->event_id,
+                'event_id'       => $lockedEvent->event_id,
                 'member_id'      => $memberId,
                 'num_tickets'    => $numTickets,
                 'payment_status' => 'PENDING',
@@ -225,6 +231,7 @@ class EventService
                         'table_id'       => $tableId,
                         'time_slots_id'  => $timeSlotId,
                         'source_type'    => 'RESERVATION',
+                        'reservation_date' => $newDate,
                     ]);
                 }
             }

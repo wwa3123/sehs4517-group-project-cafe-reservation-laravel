@@ -20,7 +20,7 @@ class ReservationService
     {
         return ReservedSlot::where('table_id', $tableId)
             ->where('time_slots_id', $timeSlotId)
-            ->whereHas('reservation', fn ($q) => $q->whereDate('date', $date))
+            ->where('reservation_date', Carbon::parse($date)->toDateString())
             ->exists();
     }
 
@@ -42,6 +42,7 @@ class ReservationService
                     'table_id'       => $data['table_id'],
                     'time_slots_id'  => $timeSlotId,
                     'source_type'    => 'RESERVATION',
+                    'reservation_date' => Carbon::parse($data['date'])->toDateString(),
                 ]);
             }
 
@@ -72,6 +73,7 @@ class ReservationService
                     'table_id'       => $data['table_id'],
                     'time_slots_id'  => $timeSlotId,
                     'source_type'    => 'RESERVATION',
+                    'reservation_date' => Carbon::parse($data['date'])->toDateString(),
                 ]);
             }
         });

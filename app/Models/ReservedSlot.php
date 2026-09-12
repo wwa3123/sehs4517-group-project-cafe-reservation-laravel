@@ -16,6 +16,7 @@ class ReservedSlot extends Model
         'reservation_id',
         'source_type',
         'table_id',
+        'reservation_date',
     ];
 
     public function timeSlot()

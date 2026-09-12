@@ -105,6 +105,11 @@ php artisan migrate:fresh --seed
 ```
 composer run dev
 ```
+
+Laravel Pail requires the Unix-only `pcntl` PHP extension, so it is not included in the default development command. On supported environments, you can tail application logs separately with:
+```
+composer run logs
+```
 ### ~~8. Start the Laravel development server~~
 
 ### ~~9. Start the frontend build tool (Vite)~~

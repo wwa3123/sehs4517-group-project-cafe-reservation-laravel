@@ -20,6 +20,7 @@ class ReservedSlotSeeder extends Seeder
             'reservation_id' => 1,
             'source_type' => 'RESERVATION',
             'table_id' => 1,
+            'reservation_date' => now()->addDays(3)->toDateString(),
         ]);
 
         ReservedSlot::create([
@@ -27,6 +28,7 @@ class ReservedSlotSeeder extends Seeder
             'reservation_id' => 2,
             'source_type' => 'RESERVATION',
             'table_id' => 2,
+            'reservation_date' => now()->addDays(5)->toDateString(),
         ]);
 
         ReservedSlot::create([
@@ -34,6 +36,7 @@ class ReservedSlotSeeder extends Seeder
             'reservation_id' => 1,
             'source_type' => 'EVENT',
             'table_id' => 1,
+            'reservation_date' => now()->addDays(3)->toDateString(),
         ]);
     }
 }
