@@ -93,10 +93,14 @@ DB_DATABASE=your_db
 DB_USERNAME=your_user
 DB_PASSWORD=your_pass
 ```
-### 7. Run database migration
+### 7. Run migrations
 ```
-php artisan migrate
+php artisan migrate:fresh --seed
 ```
+*Use `migrate:fresh --seed` for local/testing only. For production-like environments, run `php artisan migrate --force`.*
+*(Alternatively, run `composer run setup` to automate installation; it seeds only in local/testing environments.)*
+> ⚠️ `migrate:fresh` (and `composer run setup` in local/testing) drops all existing tables before recreating them, so it will erase existing database data.
+
 ### 8. Start everything
 ```
 composer run dev
@@ -104,5 +108,3 @@ composer run dev
 ### ~~8. Start the Laravel development server~~
 
 ### ~~9. Start the frontend build tool (Vite)~~
-
-
