@@ -93,10 +93,12 @@ DB_DATABASE=your_db
 DB_USERNAME=your_user
 DB_PASSWORD=your_pass
 ```
-### 7. Run database migration
+### 7. Run database migration and seed required data
 ```
-php artisan migrate
+php artisan migrate --seed
 ```
+*(Alternatively, run `composer run setup` to automate installation, migrations, and seeding.)*
+
 ### 8. Start everything
 ```
 composer run dev
