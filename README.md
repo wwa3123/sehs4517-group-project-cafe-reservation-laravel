@@ -93,9 +93,9 @@ DB_DATABASE=your_db
 DB_USERNAME=your_user
 DB_PASSWORD=your_pass
 ```
-### 7. Run database migration and seed required data
+### 7. Run a fresh migration and seed required data
 ```
-php artisan migrate --seed
+php artisan migrate:fresh --seed
 ```
 *(Alternatively, run `composer run setup` to automate installation, migrations, and seeding.)*
 
@@ -106,5 +106,4 @@ composer run dev
 ### ~~8. Start the Laravel development server~~
 
 ### ~~9. Start the frontend build tool (Vite)~~
-
 
