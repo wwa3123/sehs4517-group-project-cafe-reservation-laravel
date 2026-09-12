@@ -93,12 +93,13 @@ DB_DATABASE=your_db
 DB_USERNAME=your_user
 DB_PASSWORD=your_pass
 ```
-### 7. Run a fresh migration and seed required data
+### 7. Run migrations
 ```
 php artisan migrate:fresh --seed
 ```
-*(Alternatively, run `composer run setup` to automate installation, migrations, and seeding.)*
-> ⚠️ `migrate:fresh` (and `composer run setup`) drops all existing tables before recreating them, so it will erase existing database data.
+*Use `migrate:fresh --seed` for local/testing only. For production-like environments, run `php artisan migrate --force`.*
+*(Alternatively, run `composer run setup` to automate installation; it seeds only in local/testing environments.)*
+> ⚠️ `migrate:fresh` (and `composer run setup` in local/testing) drops all existing tables before recreating them, so it will erase existing database data.
 
 ### 8. Start everything
 ```
