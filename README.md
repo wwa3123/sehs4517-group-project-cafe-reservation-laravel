@@ -98,6 +98,7 @@ DB_PASSWORD=your_pass
 php artisan migrate:fresh --seed
 ```
 *(Alternatively, run `composer run setup` to automate installation, migrations, and seeding.)*
+> ⚠️ `migrate:fresh` (and `composer run setup`) drops all existing tables before recreating them, so it will erase existing database data.
 
 ### 8. Start everything
 ```
@@ -106,4 +107,3 @@ composer run dev
 ### ~~8. Start the Laravel development server~~
 
 ### ~~9. Start the frontend build tool (Vite)~~
-
