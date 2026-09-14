@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\EventController;
 use App\Http\Controllers\HistoryController;
 use App\Http\Controllers\LoginController;
@@ -10,6 +8,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\ReservationController;
 use App\Models\ReservedSlot;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 // --- Public --------------------------------------------------------------------
 
@@ -36,11 +36,11 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/reservation/thankyou', function () {
         return view('reservation-thankyou', [
-            'email'           => session('email', ''),
-            'date'            => session('date', ''),
-            'timeSlot'        => session('timeSlot', ''),
-            'table'           => session('table', ''),
-            'earnedTokens'    => session('earnedTokens', 0),
+            'email' => session('email', ''),
+            'date' => session('date', ''),
+            'timeSlot' => session('timeSlot', ''),
+            'table' => session('table', ''),
+            'earnedTokens' => session('earnedTokens', 0),
             'discountApplied' => session('discountApplied', 0),
             'gameSuggestions' => session('gameSuggestions', []),
         ]);
@@ -49,35 +49,28 @@ Route::middleware('auth')->group(function () {
     // Returns booked time_slot IDs for a given table + date (used by JS in create forms)
     Route::get('/api/booked-slots', function (Request $request) {
         $request->validate([
-            'table_id'               => ['required', 'integer'],
-            'date'                   => ['required', 'date'],
+            'table_id' => ['required', 'integer'],
+            'date' => ['required', 'date'],
             'exclude_reservation_id' => ['nullable', 'integer'],
-            'exclude_event_id'       => ['nullable', 'integer'],
+            'exclude_event_id' => ['nullable', 'integer'],
         ]);
 
-        $excludeId      = $request->input('exclude_reservation_id');
+        $excludeId = $request->input('exclude_reservation_id');
         $excludeEventId = $request->input('exclude_event_id');
 
-        // Collect reservation IDs that belong to the excluded event's system member
-        $excludeEventReservationIds = [];
-        if ($excludeEventId) {
-            $systemMember = \App\Models\Member::where('email', 'event-' . $excludeEventId . '@system.local')->first();
-            if ($systemMember) {
-                $excludeEventReservationIds = \App\Models\Reservation::where('member_id', $systemMember->member_id)
-                    ->pluck('reservation_id')
-                    ->toArray();
-            }
-        }
-
         $booked = ReservedSlot::where('table_id', $request->input('table_id'))
-            ->whereHas('reservation', function ($q) use ($request, $excludeId, $excludeEventReservationIds) {
-                $q->whereDate('date', $request->input('date'));
-                if ($excludeId) {
-                    $q->where('reservation_id', '!=', $excludeId);
-                }
-                if (!empty($excludeEventReservationIds)) {
-                    $q->whereNotIn('reservation_id', $excludeEventReservationIds);
-                }
+            ->where('reservation_date', $request->input('date'))
+            ->when($excludeId, function ($query) use ($excludeId) {
+                $query->where(function ($query) use ($excludeId) {
+                    $query->whereNull('reservation_id')
+                        ->orWhere('reservation_id', '!=', $excludeId);
+                });
+            })
+            ->when($excludeEventId, function ($query) use ($excludeEventId) {
+                $query->where(function ($query) use ($excludeEventId) {
+                    $query->whereNull('event_id')
+                        ->orWhere('event_id', '!=', $excludeEventId);
+                });
             })
             ->pluck('time_slots_id');
 

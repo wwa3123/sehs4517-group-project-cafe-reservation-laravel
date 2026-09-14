@@ -14,6 +14,7 @@ class ReservedSlot extends Model
     protected $fillable = [
         'time_slots_id',
         'reservation_id',
+        'event_id',
         'source_type',
         'table_id',
         'reservation_date',
@@ -27,6 +28,11 @@ class ReservedSlot extends Model
     public function reservation()
     {
         return $this->belongsTo(Reservation::class, 'reservation_id');
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id', 'event_id');
     }
 
     public function table()

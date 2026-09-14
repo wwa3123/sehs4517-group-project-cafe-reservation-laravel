@@ -4,19 +4,14 @@ namespace App\Services;
 
 use App\Models\Event;
 use App\Models\EventRegistration;
-use App\Models\Member;
-use App\Models\Reservation;
 use App\Models\ReservedSlot;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 
 class EventService
 {
-    public function __construct(private ReservationService $reservationService) {}
-
     /**
      * Fetch all events with ticket counts and available slots.
      */
@@ -32,6 +27,7 @@ class EventService
             $registered = (int) ($event->registered_tickets ?? 0);
             $event->registered_tickets = $registered;
             $event->available_tickets = max(0, (int) $event->max_participants - $registered);
+
             return $event;
         });
 
@@ -56,35 +52,15 @@ class EventService
     {
         return DB::transaction(function () use ($data) {
             $event = Event::create([
-                'event_name'          => $data['event_name'],
+                'event_name' => $data['event_name'],
                 'event_descriptions' => $data['event_descriptions'] ?? null,
-                'event_fee'           => $data['event_fee'],
-                'max_participants'    => $data['max_participants'],
-                'event_date'          => $data['event_date'],
-            ]);
-
-            $systemMember = Member::create([
-                'email'            => 'event-' . $event->event_id . '@system.local',
-                'first_name'       => $event->event_name,
-                'last_name'        => '(Event)',
-                'password_hash'    => Hash::make(bin2hex(random_bytes(16))),
-                'role'             => 'system',
-                'subscribe_events' => false,
-                'loyalty_points'   => 0,
+                'event_fee' => $data['event_fee'],
+                'max_participants' => $data['max_participants'],
+                'event_date' => $data['event_date'],
             ]);
 
             $eventDate = Carbon::parse($event->event_date)->toDateString();
-
-            foreach ((array) $data['table_id'] as $tableId) {
-                $this->reservationService->createReservation([
-                    'member_id'     => $systemMember->member_id,
-                    'event_id'      => $event->event_id,
-                    'date'          => $eventDate,
-                    'num_guests'    => $data['num_guests'],
-                    'table_id'      => $tableId,
-                    'time_slots_id' => $data['time_slots_id'],
-                ]);
-            }
+            $this->createReservedSlots($event, (array) $data['table_id'], (array) $data['time_slots_id'], $eventDate);
 
             return $event;
         });
@@ -114,7 +90,7 @@ class EventService
 
         return [
             'registered' => $registered,
-            'available'  => max(0, (int) $event->max_participants - $registered),
+            'available' => max(0, (int) $event->max_participants - $registered),
         ];
     }
 
@@ -152,9 +128,9 @@ class EventService
             }
 
             EventRegistration::create([
-                'event_id'       => $lockedEvent->event_id,
-                'member_id'      => $memberId,
-                'num_tickets'    => $numTickets,
+                'event_id' => $lockedEvent->event_id,
+                'member_id' => $memberId,
+                'num_tickets' => $numTickets,
                 'payment_status' => 'PENDING',
             ]);
 
@@ -163,104 +139,67 @@ class EventService
     }
 
     /**
-     * Return the current table IDs, time-slot IDs, and num_guests for the event's system reservation,
+     * Return the current table IDs, time-slot IDs, and participant count,
      * used to pre-populate the edit form.
      *
-     * @return array{currentTableIds: array, currentTimeSlotIds: array, currentNumGuests: int}
+     * @return array{currentTableIds: array, currentTimeSlotIds: array}
      */
     public function getEditData(Event $event): array
     {
-        $systemMember       = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
-        $currentTableIds    = [];
-        $currentTimeSlotIds = [];
-        $currentNumGuests   = (int) $event->max_participants;
+        $reservedSlots = $event->reservedSlots()->get();
+        $currentTableIds = $reservedSlots->pluck('table_id')->unique()->values()->toArray();
+        $currentTimeSlotIds = $reservedSlots->pluck('time_slots_id')->unique()->values()->toArray();
 
-        if ($systemMember) {
-            $reservations       = Reservation::where('member_id', $systemMember->member_id)->with('reservedSlots')->get();
-            $currentTableIds    = $reservations->flatMap->reservedSlots->pluck('table_id')->unique()->values()->toArray();
-            $firstReservation   = $reservations->first();
-            $currentTimeSlotIds = $firstReservation?->reservedSlots->pluck('time_slots_id')->toArray() ?? [];
-            $currentNumGuests   = $firstReservation?->num_guests ?? $currentNumGuests;
-        }
-
-        return compact('currentTableIds', 'currentTimeSlotIds', 'currentNumGuests');
+        return compact('currentTableIds', 'currentTimeSlotIds');
     }
 
     /**
-     * Update event details and sync the linked system reservations (date, guests, tables, time-slots).
+     * Update event details and replace the linked event table slots.
      */
     public function updateEvent(Event $event, array $data): Event
     {
         DB::transaction(function () use ($event, $data) {
             $event->update([
-                'event_name'         => $data['event_name'],
+                'event_name' => $data['event_name'],
                 'event_descriptions' => $data['event_descriptions'] ?? null,
-                'event_fee'          => $data['event_fee'],
-                'max_participants'   => $data['max_participants'],
-                'event_date'         => $data['event_date'],
+                'event_fee' => $data['event_fee'],
+                'max_participants' => $data['max_participants'],
+                'event_date' => $data['event_date'],
             ]);
 
-            $systemMember = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
-            if (!$systemMember) {
-                return;
-            }
-
-            // Delete all existing system reservations for this event
-            $existing = Reservation::where('member_id', $systemMember->member_id)->get();
-            foreach ($existing as $reservation) {
-                $reservation->loyaltyTransactions()->delete();
-                $reservation->reservedSlots()->delete();
-                $reservation->delete();
-            }
-
-            // Re-create reservations for the updated table / time-slot selection
-            $newDate   = Carbon::parse($data['event_date'])->toDateString();
-            $numGuests = (int) ($data['num_guests'] ?? $data['max_participants']);
-
-            foreach ((array) ($data['table_id'] ?? []) as $tableId) {
-                $reservation = Reservation::create([
-                    'member_id'  => $systemMember->member_id,
-                    'event_id'   => $event->event_id,
-                    'date'       => $newDate,
-                    'num_guests' => $numGuests,
-                ]);
-
-                foreach ((array) ($data['time_slots_id'] ?? []) as $timeSlotId) {
-                    ReservedSlot::create([
-                        'reservation_id' => $reservation->reservation_id,
-                        'table_id'       => $tableId,
-                        'time_slots_id'  => $timeSlotId,
-                        'source_type'    => 'RESERVATION',
-                        'reservation_date' => $newDate,
-                    ]);
-                }
-            }
+            $newDate = Carbon::parse($data['event_date'])->toDateString();
+            $event->reservedSlots()->delete();
+            $this->createReservedSlots($event, (array) $data['table_id'], (array) $data['time_slots_id'], $newDate);
         });
 
         return $event->fresh();
     }
 
     /**
-     * Delete an event and all associated system reservations and the system member.
+     * Delete an event and all associated table slots.
      * Event registrations are removed via cascade.
      */
     public function deleteEvent(Event $event): void
     {
         DB::transaction(function () use ($event) {
-            $systemMember = Member::where('email', 'event-' . $event->event_id . '@system.local')->first();
-
-            if ($systemMember) {
-                $reservations = Reservation::where('member_id', $systemMember->member_id)->get();
-                foreach ($reservations as $reservation) {
-                    $reservation->loyaltyTransactions()->delete();
-                    $reservation->reservedSlots()->delete();
-                    $reservation->delete();
-                }
-                $systemMember->delete();
-            }
-
             $event->registrations()->delete();
+            $event->reservedSlots()->delete();
             $event->delete();
         });
+    }
+
+    private function createReservedSlots(Event $event, array $tableIds, array $timeSlotIds, string $date): void
+    {
+        foreach ($tableIds as $tableId) {
+            foreach ($timeSlotIds as $timeSlotId) {
+                ReservedSlot::create([
+                    'event_id' => $event->event_id,
+                    'table_id' => $tableId,
+                    'time_slots_id' => $timeSlotId,
+                    'source_type' => 'EVENT',
+                    'reservation_date' => $date,
+                ]);
+            }
+        }
     }
 }

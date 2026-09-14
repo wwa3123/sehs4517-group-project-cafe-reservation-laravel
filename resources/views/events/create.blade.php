@@ -49,13 +49,7 @@
                 </div>
 
                 <hr class="border-gray-200">
-                <p class="text-sm text-gray-500">Reservation details — a table slot will be reserved for this event automatically.</p>
-
-                <div>
-                    <label for="num_guests" class="mb-1.5 block text-sm font-medium text-gray-700">Number of Guests</label>
-                    <input type="number" name="num_guests" id="num_guests" value="{{ old('num_guests', 1) }}" min="1" required readonly class="block w-full rounded-lg border border-gray-200 bg-gray-100 px-3 py-2.5 text-sm text-gray-600 cursor-not-allowed">
-                    <p class="mt-1 text-xs text-gray-500">Automatically set to Max Participants.</p>
-                </div>
+                <p class="text-sm text-gray-500">Select the table slots to reserve for this event.</p>
 
                 <div>
                     <label for="table_id" class="mb-1.5 block text-sm font-medium text-gray-700">Table(s)</label>
@@ -83,7 +77,7 @@
 
                 <div class="pt-2">
                     <button type="submit" class="inline-flex items-center justify-center rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        Create Event &amp; Reserve Slot
+                        Create Event &amp; Reserve Slots
                     </button>
                 </div>
             </form>
@@ -126,15 +120,6 @@
             tableSelect.addEventListener('change', refreshSlots);
             dateInput.addEventListener('change', refreshSlots);
             refreshSlots();
-        })();
-
-        // Sync num_guests to max_participants
-        (function () {
-            const maxInput    = document.getElementById('max_participants');
-            const guestsInput = document.getElementById('num_guests');
-            const sync = () => { guestsInput.value = maxInput.value || 1; };
-            maxInput.addEventListener('input', sync);
-            sync();
         })();
     </script>
 @endpush
