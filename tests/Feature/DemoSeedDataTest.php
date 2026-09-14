@@ -19,6 +19,7 @@ class DemoSeedDataTest extends TestCase
         $this->assertDatabaseCount('reservations', 3);
         $this->assertDatabaseCount('loyalty_txns', 3);
         $this->assertDatabaseCount('reserved_slots', 13);
+        $this->assertDatabaseHas('menu_items', ['item_name' => 'Espresso', 'price_cents' => 350]);
         $this->assertDatabaseMissing('members', ['role' => 'system']);
         $this->assertDatabaseMissing('reserved_slots', ['source_type' => 'EVENT', 'reservation_id' => 1]);
         $this->assertDatabaseMissing('reserved_slots', ['source_type' => 'RESERVATION', 'event_id' => 1]);

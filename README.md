@@ -1,115 +1,62 @@
-# Café Reservation System (Laravel)
+# Chit-Chat Cafe
 
-A full‑stack café reservation platform built with Laravel, allowing customers to book tables online and staff to manage reservations efficiently.  
-Developed as part of the **SEHS4517 Group Project**.
+A Laravel 12 reservation platform for a board-game cafe. Customers can reserve tables, earn and redeem loyalty tokens, and join events; administrators manage reservations and event capacity.
 
----
-## Dependencies 
-| Package | Version |
-|--------|---------|
-| PHP |^8.2 |
-| laravel/framework | 12.x |
-|Node.js| v24.14.0|
+## Highlights
 
----
-## Full Laravel Setup Guide (XAMPP + Composer + Node.js + phpMyAdmin)
-### 1.Install XAMPP
-XAMPP gives you Apache + PHP + MySQL.
+- Database-enforced table/time-slot/day availability
+- Event-owned table holds, distinct from customer reservations
+- Transactional reservation loyalty accounting
+- Event capacity checks protected with row locking
+- Role-protected administration and CSRF-protected logout
+- Seed data created through application services, not direct inconsistent inserts
 
-<b>Steps</b>
-- Download XAMPP (PHP 8.2.12)
-- Install it normally.
-- After installation, verify:
-```
-"C:\xampp\php\php.exe" -v
-```
+## Requirements
 
-### 2. Install Composer
-Composer is required for Laravel.
-<b>Steps</b>
-- Download Composer installer.
-- During installation, make sure it detects:
-```
-C:\xampp\php\php.exe
-```
-- After installation, verify:
-```
-composer -V
-```
+- PHP 8.2 or newer with MySQL or SQLite support
+- Composer 2
+- Node.js 22 or newer
+- MySQL 8+ for local production-like development
 
-### 3.Install Node.js + npm
-Node.js is required for Laravel Mix / Vite.
-<b>Steps</b>
-- Download Node.js v24.14.0 LTS.
--Install it.
--- Verify:
-```
-node -v
-npm -v
-```
+## Local setup
 
-### 4.Create Database in phpMyAdmin
-<b>Steps</b>
-- Open XAMPP Control Panel.
-- Start: Apache + MySQL
-- Open browser:
-```
-http://localhost/phpmyadmin
-```
-- Click Databases.
-- Create a new database:
-```
-laravel_app
-```
----
-## How to install
-### 1. Clone the repository
-```
+```bash
 git clone https://github.com/wwa3123/sehs4517-group-project-cafe-reservation-laravel.git
-```
-```
 cd sehs4517-group-project-cafe-reservation-laravel
-```
-### 2.Install backend dependencies (Composer)
-```
 composer install
-```
-### 3.Install frontend dependencies 
-```
-npm install
-```
-### 4. Create your environment file
-```
+npm ci
 cp .env.example .env
-```
-### 5. Generate application key
-```
 php artisan key:generate
 ```
-### 6. Configure your database
-Edit ```.env``` and update:
-```
-DB_DATABASE=your_db
-DB_USERNAME=your_user
-DB_PASSWORD=your_pass
-```
-### 7. Run migrations
-```
-php artisan migrate:fresh --seed
-```
-*Use `migrate:fresh --seed` for local/testing only. For production-like environments, run `php artisan migrate --force`.*
-*(Alternatively, run `composer run setup` to automate installation; it seeds only in local/testing environments.)*
-> ⚠️ `migrate:fresh` (and `composer run setup` in local/testing) drops all existing tables before recreating them, so it will erase existing database data.
 
-### 8. Start everything
-```
+Configure the `DB_*` values in `.env`, then create a local demo database:
+
+```bash
+php artisan migrate:fresh --seed
+npm run build
 composer run dev
 ```
 
-Laravel Pail requires the Unix-only `pcntl` PHP extension, so it is not included in the default development command. On supported environments, you can tail application logs separately with:
-```
-composer run logs
-```
-### ~~8. Start the Laravel development server~~
+`migrate:fresh --seed` destroys existing data and is intended only for local development. The seed data has random passwords so public default credentials are not shipped; create an account through the registration page to sign in.
 
-### ~~9. Start the frontend build tool (Vite)~~
+## Validation
+
+```bash
+php artisan test
+npm run build
+```
+
+The test suite uses an in-memory SQLite database and covers event slot ownership, slot conflicts, service-backed seed data, email privacy, and logout behavior.
+
+## Deployment
+
+The included [Dockerfile](./Dockerfile) builds production Composer dependencies and Vite assets, then serves Laravel from Apache. Configure `APP_KEY`, `APP_ENV=production`, `APP_DEBUG=false`, and production `DB_*` variables in the hosting platform. After deploy, run:
+
+```bash
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+GitHub Actions runs dependency installation, frontend compilation, and the Laravel test suite for every push and pull request.

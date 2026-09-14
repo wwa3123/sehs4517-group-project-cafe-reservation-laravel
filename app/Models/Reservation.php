@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -23,6 +25,13 @@ class Reservation extends Model
         'date' => 'date',
         'discount_amount_saved' => 'decimal:2',
     ];
+
+    protected function date(): Attribute
+    {
+        return Attribute::make(
+            set: fn (string $value) => Carbon::parse($value)->toDateString(),
+        );
+    }
 
     /**
      * Get the member that owns the reservation.
