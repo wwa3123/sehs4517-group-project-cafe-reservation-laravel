@@ -33,10 +33,10 @@ class ReservedSlotSeeder extends Seeder
 
         ReservedSlot::create([
             'time_slots_id' => 3,
-            'reservation_id' => 1,
+            'event_id' => 1,
             'source_type' => 'EVENT',
             'table_id' => 1,
-            'reservation_date' => now()->addDays(3)->toDateString(),
+            'reservation_date' => now()->addDays(15)->toDateString(),
         ]);
     }
 }

@@ -42,11 +42,11 @@ class Event extends Model
     }
 
     /**
-     * Get reservations linked to this event.
+     * Get the table slots held for this event.
      */
-    public function reservations()
+    public function reservedSlots()
     {
-        return $this->hasMany(Reservation::class, 'event_id', 'event_id');
+        return $this->hasMany(ReservedSlot::class, 'event_id', 'event_id');
     }
 
     /**

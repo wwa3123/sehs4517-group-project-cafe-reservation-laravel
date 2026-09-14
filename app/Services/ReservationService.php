@@ -30,26 +30,25 @@ class ReservationService
             $memberId = (int) $data['member_id'];
 
             $reservation = Reservation::create([
-                'member_id'  => $memberId,
-                'event_id'   => isset($data['event_id']) ? (int) $data['event_id'] : null,
-                'date'       => $data['date'],
+                'member_id' => $memberId,
+                'date' => $data['date'],
                 'num_guests' => $data['num_guests'],
             ]);
 
             foreach ($data['time_slots_id'] as $timeSlotId) {
                 ReservedSlot::create([
                     'reservation_id' => $reservation->reservation_id,
-                    'table_id'       => $data['table_id'],
-                    'time_slots_id'  => $timeSlotId,
-                    'source_type'    => 'RESERVATION',
+                    'table_id' => $data['table_id'],
+                    'time_slots_id' => $timeSlotId,
+                    'source_type' => 'RESERVATION',
                     'reservation_date' => Carbon::parse($data['date'])->toDateString(),
                 ]);
             }
 
             $reservation->loyaltyTransactions()->create([
-                'txn_type'     => 'RESERVATION',
-                'points'       => self::TOKENS_PER_RESERVATION,
-                'descriptions' => 'Loyalty tokens earned from reservation #' . $reservation->reservation_id,
+                'txn_type' => 'RESERVATION',
+                'points' => self::TOKENS_PER_RESERVATION,
+                'descriptions' => 'Loyalty tokens earned from reservation #'.$reservation->reservation_id,
             ]);
 
             Member::where('member_id', $memberId)->increment('loyalty_points', self::TOKENS_PER_RESERVATION);
@@ -62,7 +61,7 @@ class ReservationService
     {
         DB::transaction(function () use ($reservation, $data) {
             $reservation->update([
-                'date'       => $data['date'],
+                'date' => $data['date'],
                 'num_guests' => $data['num_guests'],
             ]);
 
@@ -70,9 +69,9 @@ class ReservationService
             foreach ($data['time_slots_id'] as $timeSlotId) {
                 ReservedSlot::create([
                     'reservation_id' => $reservation->reservation_id,
-                    'table_id'       => $data['table_id'],
-                    'time_slots_id'  => $timeSlotId,
-                    'source_type'    => 'RESERVATION',
+                    'table_id' => $data['table_id'],
+                    'time_slots_id' => $timeSlotId,
+                    'source_type' => 'RESERVATION',
                     'reservation_date' => Carbon::parse($data['date'])->toDateString(),
                 ]);
             }
@@ -106,7 +105,7 @@ class ReservationService
      */
     public function buildThankYouData(Reservation $reservation, int $tokensToSpend): array
     {
-        $earnedTokens    = (int) optional($reservation->loyaltyTransactions->first())->points;
+        $earnedTokens = (int) optional($reservation->loyaltyTransactions->first())->points;
         $discountApplied = 0;
 
         if ($tokensToSpend > 0 && $reservation->member) {
@@ -120,10 +119,10 @@ class ReservationService
         $reservation->member?->refresh();
 
         $firstSlot = optional($reservation->reservedSlots->load('timeSlot')->first())->timeSlot;
-        $table     = optional($reservation->reservedSlots->first())->table ?? $reservation->table;
+        $table = optional($reservation->reservedSlots->first())->table ?? $reservation->table;
 
         $timeLabel = $firstSlot
-            ? Carbon::parse($firstSlot->start_time)->format('g:i A') . ' – ' . Carbon::parse($firstSlot->end_time)->format('g:i A')
+            ? Carbon::parse($firstSlot->start_time)->format('g:i A').' – '.Carbon::parse($firstSlot->end_time)->format('g:i A')
             : 'N/A';
 
         $gameSuggestions = Game::inRandomOrder()->limit(3)->pluck('title')->toArray();
@@ -132,11 +131,11 @@ class ReservationService
         }
 
         return [
-            'email'           => $reservation->member->email,
-            'date'            => Carbon::parse($reservation->date)->format('F j, Y'),
-            'timeSlot'        => $timeLabel,
-            'table'           => optional($table)->name ?? 'Table',
-            'earnedTokens'    => $earnedTokens,
+            'email' => $reservation->member->email,
+            'date' => Carbon::parse($reservation->date)->format('F j, Y'),
+            'timeSlot' => $timeLabel,
+            'table' => optional($table)->name ?? 'Table',
+            'earnedTokens' => $earnedTokens,
             'discountApplied' => $discountApplied,
             'gameSuggestions' => $gameSuggestions,
         ];

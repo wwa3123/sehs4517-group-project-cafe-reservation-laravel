@@ -13,7 +13,6 @@ class Reservation extends Model
 
     protected $fillable = [
         'member_id',
-        'event_id',
         'date',
         'num_guests',
         'discount_tokens_used',
@@ -21,7 +20,7 @@ class Reservation extends Model
     ];
 
     protected $casts = [
-        'date'                 => 'datetime',
+        'date' => 'datetime',
         'discount_amount_saved' => 'decimal:2',
     ];
 
@@ -31,14 +30,6 @@ class Reservation extends Model
     public function member()
     {
         return $this->belongsTo(Member::class, 'member_id');
-    }
-
-    /**
-     * Get the event linked to this reservation.
-     */
-    public function event()
-    {
-        return $this->belongsTo(Event::class, 'event_id', 'event_id');
     }
 
     /**
