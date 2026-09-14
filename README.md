@@ -37,7 +37,7 @@ npm run build
 composer run dev
 ```
 
-`migrate:fresh --seed` destroys existing data and is intended only for local development. The seed data has random passwords so public default credentials are not shipped; create an account through the registration page to sign in.
+`migrate:fresh --seed` destroys existing data and is intended only for local development. The local demo administrator is `admin@example.com` with password `AdminDemo2026!`. Change `DEMO_ADMIN_PASSWORD` in `.env` before sharing a demo environment. The seeder only applies this configured password in `local` and `testing`; production seed runs always generate a random password.
 
 ## Validation
 

@@ -17,12 +17,16 @@ class MemberSeeder extends Seeder
      */
     public function run(): void
     {
+        $adminPassword = app()->environment('local', 'testing')
+            ? env('DEMO_ADMIN_PASSWORD', Str::random(40))
+            : Str::random(40);
+
         Member::updateOrCreate(['email' => 'admin@example.com'], [
             'first_name' => 'Admin',
             'last_name' => 'User',
             'address' => '1 Admin Plaza, Springfield',
             'phone' => '555-0100',
-            'password_hash' => Hash::make(Str::random(40)),
+            'password_hash' => Hash::make($adminPassword),
             'role' => 'admin',
             'subscribe_events' => false,
             'loyalty_points' => 0,
