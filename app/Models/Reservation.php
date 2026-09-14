@@ -20,7 +20,7 @@ class Reservation extends Model
     ];
 
     protected $casts = [
-        'date' => 'datetime',
+        'date' => 'date',
         'discount_amount_saved' => 'decimal:2',
     ];
 

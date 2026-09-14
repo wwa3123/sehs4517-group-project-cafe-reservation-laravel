@@ -24,7 +24,6 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">ID</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Member</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Date</th>
-                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Event</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Guests</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Table</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Time Slot</th>
@@ -38,17 +37,9 @@
                             <tr class="hover:bg-gray-50">
                                 <td class="px-4 py-3 text-sm text-gray-700">#{{ $reservation->reservation_id }}</td>
                                 <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                                    @if($reservation->member?->role === 'system')
-                                        {{ $reservation->event?->event_name ?? $reservation->member->first_name }}
-                                        <span class="ml-1 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Event</span>
-                                    @else
-                                        {{ $reservation->member->first_name }} {{ $reservation->member->last_name }}
-                                    @endif
+                                    {{ $reservation->member->first_name }} {{ $reservation->member->last_name }}
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('M j, Y') }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">
-                                    {{ $reservation->event?->event_name ?? 'None' }}
-                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->num_guests }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     @foreach($reservation->reservedSlots->pluck('table.name')->unique() as $tableName)
@@ -86,23 +77,19 @@
                                     <div class="flex items-center gap-2">
                                         <a href="{{ route('reservations.show', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">View</a>
                                         @if(auth()->user()?->role === 'admin')
-                                        @if($reservation->member?->role !== 'system')
                                         <a href="{{ route('reservations.edit', $reservation) }}" class="inline-flex items-center rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100">Edit</a>
-                                        @endif
-                                        @if($reservation->member?->role !== 'system')
                                         <form action="{{ route('reservations.destroy', $reservation) }}" method="POST" onsubmit="return confirm('Delete this reservation?')">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="inline-flex items-center rounded-lg border border-red-300 px-3 py-1.5 text-xs font-medium text-red-700 hover:bg-red-50">Delete</button>
                                         </form>
                                         @endif
-                                        @endif
                                     </div>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
+                                <td colspan="9" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
                             </tr>
                         @endforelse
                     </tbody>

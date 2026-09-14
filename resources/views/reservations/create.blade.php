@@ -241,6 +241,11 @@
                             calLabel.textContent = `Selected: ${MONTHS[date.getMonth()]} ${d}, ${date.getFullYear()}`;
                             calLabel.classList.remove('hidden');
                             render();
+                            document.addEventListener('reservation-calendar-clear', () => {
+                                selected = null;
+                                calLabel.classList.add('hidden');
+                                render();
+                            });
                             refreshSlots();
                         });
                     }
@@ -362,11 +367,9 @@
 
         // ── Clear button ────────────────────────────────────────────────────
         document.getElementById('btn-clear').addEventListener('click', function () {
-            // Reset hidden date input & calendar
+            // Reset hidden date input and notify the calendar component.
             dateInput.value = '';
-            selected = null;
-            calLabel.classList.add('hidden');
-            render();
+            document.dispatchEvent(new Event('reservation-calendar-clear'));
 
             // Deselect all table cards
             document.querySelectorAll('.table-card input[type=radio]').forEach(r => r.checked = false);

@@ -21,12 +21,11 @@ Route::post('/login', [LoginController::class, 'verify'])->name('login.verify')-
 
 Route::get('/register', [RegistrationController::class, 'show'])->name('register');
 Route::post('/register', [RegistrationController::class, 'register']);
-Route::get('/check-email', [RegistrationController::class, 'checkEmail']);
 
 // --- Authenticated -------------------------------------------------------------
 
 Route::middleware('auth')->group(function () {
-    Route::get('/logout', [LoginController::class, 'logout'])->name('logout');
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
     Route::put('/profile', [ProfileController::class, 'update']);

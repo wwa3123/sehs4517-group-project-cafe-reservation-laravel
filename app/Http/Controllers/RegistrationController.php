@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\RegistrationRequest;
 use App\Models\Member;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use App\Http\Requests\RegistrationRequest;
 
-
-class RegistrationController extends Controller {
-    public function show() {
+class RegistrationController extends Controller
+{
+    public function show()
+    {
         if (Auth::check()) {
             return redirect('/profile');
         }
@@ -18,18 +17,15 @@ class RegistrationController extends Controller {
         return view('register');
     }
 
-    public function register(RegistrationRequest $request) {
+    public function register(RegistrationRequest $request)
+    {
 
         $user = Member::registerMember($request->validated());
 
         Auth::login($user);
 
         $request->session()->forget('_old_input');
-        return redirect('/profile')->with('success', 'Successfully Registered!');
-    }
 
-    public function checkEmail(Request $request) {
-        $exists = DB::table('members')->where('email', $request->input('email'))->exists();
-        return response()->json(['exists' => $exists]);
+        return redirect('/profile')->with('success', 'Successfully Registered!');
     }
 }

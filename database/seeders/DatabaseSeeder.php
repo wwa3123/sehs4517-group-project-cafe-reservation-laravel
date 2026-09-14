@@ -25,8 +25,6 @@ class DatabaseSeeder extends Seeder
             FeaturedGameSeeder::class,
             EventRegistrationSeeder::class,
             ReservationSeeder::class,
-            LoyaltyTxnSeeder::class,
-            ReservedSlotSeeder::class,
         ]);
     }
 }
