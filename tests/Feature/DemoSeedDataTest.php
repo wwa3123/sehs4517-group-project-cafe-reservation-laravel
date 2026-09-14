@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Member;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Tests\TestCase;
 
 class DemoSeedDataTest extends TestCase
@@ -20,6 +21,7 @@ class DemoSeedDataTest extends TestCase
         $this->assertDatabaseCount('loyalty_txns', 3);
         $this->assertDatabaseCount('reserved_slots', 13);
         $this->assertDatabaseHas('menu_items', ['item_name' => 'Espresso', 'price_cents' => 350]);
+        $this->assertTrue(Hash::check('AdminDemo2026!', Member::where('email', 'admin@example.com')->valueOrFail('password_hash')));
         $this->assertDatabaseMissing('members', ['role' => 'system']);
         $this->assertDatabaseMissing('reserved_slots', ['source_type' => 'EVENT', 'reservation_id' => 1]);
         $this->assertDatabaseMissing('reserved_slots', ['source_type' => 'RESERVATION', 'event_id' => 1]);
