@@ -38,13 +38,12 @@
                 <input type="password" id="password" name="password" required autocomplete="current-password">
             </div>
 
-            <!-- remember me + forgot password -->
+            <!-- remember me -->
             <div class="form-aux">
                 <label class="checkbox-group">
                     <input type="checkbox" name="remember" id="remember">
                     <span>Remember me</span>
                 </label>
-                <a href="#" class="forgot-link" id="forgotPwdLink">Forgot password?</a>
             </div>
 
             <!-- login button -->

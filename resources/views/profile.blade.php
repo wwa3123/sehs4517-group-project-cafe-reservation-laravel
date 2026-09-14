@@ -1,86 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Profile')
 @push('head')
-    @vite('resources/js/validation.js')
+    @vite(['resources/css/forms.css', 'resources/js/validation.js'])
 @endpush
 @section('content')
-    <style>
-        .form-card {
-            background-color: var(--card-bg);
-            border-color: var(--border);
-        }
-
-        .form-label {
-            color: var(--text-secondary);
-        }
-
-        .form-input {
-            background-color: var(--card-bg);
-            color: var(--text-primary);
-            border-color: #d0d5cf;
-            transition: all 0.2s ease;
-        }
-
-        body.app-page.dark .form-input {
-            border-color: var(--border);
-        }
-
-        .form-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-tint);
-            outline: none;
-        }
-
-        .accent-box {
-            background-color: var(--accent-tint);
-        }
-
-        .form-error {
-            color: #ef4444;
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
-            color: white;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 159, 47, 0.3);
-        }
-
-        .btn-primary:active {
-            background-color: var(--accent);
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        .btn-secondary {
-            background-color: var(--border);
-            color: var(--text-secondary);
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: #cde2d5;
-        }
-
-        body.app-page.dark .btn-secondary:hover {
-            background-color: #334a2f;
-        }
-
-        .text-accent {
-            color: var(--accent);
-        }
-
-        .text-accent:hover {
-            background-color: var(--accent-tint);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-    </style>
     <div class="max-w-2xl w-full rounded-3xl border shadow-xl p-10 mx-auto my-8 transition-all sm:p-7 form-card">
         @if (session()->has('success'))
             <div class="p-3.5 rounded-2xl mb-6 font-semibold accent-box border border-accent" style="border-color: var(--accent); color: var(--text-secondary);">

@@ -122,7 +122,10 @@
                         <div class="menu-card-img-placeholder">🍽️</div>
                     @endif
                     <div class="menu-card-body">
+                    <div class="flex items-start justify-between gap-3">
                         <div class="menu-card-name">{{ $item->item_name }}</div>
+                        <div class="text-sm font-semibold text-green-700">${{ number_format($item->price_cents / 100, 2) }}</div>
+                    </div>
                         @if($item->description)
                             <div class="menu-card-desc">{{ $item->description }}</div>
                         @endif

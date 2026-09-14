@@ -2,7 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\EventRegistration;
+use App\Models\Event;
+use App\Models\Member;
+use App\Services\EventService;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -15,25 +17,22 @@ class EventRegistrationSeeder extends Seeder
      */
     public function run(): void
     {
-        EventRegistration::create([
-            'event_id' => 1,
-            'member_id' => 1,
-            'num_tickets' => 2,
-            'payment_status' => 'COMPLETED',
-        ]);
+        $service = app(EventService::class);
+        $tournament = Event::where('event_name', 'Strategy Game Tournament')->firstOrFail();
+        $familyNight = Event::where('event_name', 'Family Game Night')->firstOrFail();
 
-        EventRegistration::create([
-            'event_id' => 1,
-            'member_id' => 2,
-            'num_tickets' => 1,
-            'payment_status' => 'COMPLETED',
-        ]);
+        $registrations = [
+            [$tournament, 'admin@example.com', 2, 'COMPLETED'],
+            [$tournament, 'john.doe@example.com', 1, 'COMPLETED'],
+            [$familyNight, 'jane.smith@example.com', 3, 'PENDING'],
+        ];
 
-        EventRegistration::create([
-            'event_id' => 2,
-            'member_id' => 3,
-            'num_tickets' => 3,
-            'payment_status' => 'PENDING',
-        ]);
+        foreach ($registrations as [$event, $email, $tickets, $status]) {
+            $memberId = Member::where('email', $email)->valueOrFail('member_id');
+            $service->joinEvent($event, $memberId, $tickets);
+            $event->registrations()
+                ->where('member_id', $memberId)
+                ->update(['payment_status' => $status]);
+        }
     }
 }

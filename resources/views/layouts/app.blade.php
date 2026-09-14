@@ -35,7 +35,10 @@
                    class="app-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
                     Profile
                 </a>
-                <a href="{{ route('logout') }}" class="app-nav-link app-nav-logout">Logout</a>
+                <form method="POST" action="{{ route('logout') }}" class="inline">
+                    @csrf
+                    <button type="submit" class="app-nav-link app-nav-logout">Logout</button>
+                </form>
                 @endauth
             </div>
         </div>

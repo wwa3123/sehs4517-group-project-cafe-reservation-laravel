@@ -26,31 +26,18 @@
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Member</dt>
                     <dd class="mt-1 text-sm font-medium text-gray-900">
-                        @if($reservation->member?->role === 'system')
-                            {{ $reservation->event?->event_name ?? $reservation->member->first_name }}
-                            <span class="ml-1 inline-flex items-center rounded-full bg-indigo-100 px-2 py-0.5 text-xs font-medium text-indigo-700">Event</span>
-                        @else
-                            {{ $reservation->member->first_name }} {{ $reservation->member->last_name }}
-                        @endif
+                        {{ $reservation->member->first_name }} {{ $reservation->member->last_name }}
                     </dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Email</dt>
                     <dd class="mt-1 text-sm text-gray-700">
-                        @if($reservation->member?->role === 'system')
-                            —
-                        @else
-                            {{ $reservation->member->email }}
-                        @endif
+                        {{ $reservation->member->email }}
                     </dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Date</dt>
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->date->format('F j, Y') }}</dd>
-                </div>
-                <div>
-                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Event</dt>
-                    <dd class="mt-1 text-sm text-gray-700">{{ $reservation->event?->event_name ?? 'None' }}</dd>
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Number of Guests</dt>

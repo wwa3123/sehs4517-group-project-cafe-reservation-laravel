@@ -203,8 +203,8 @@
                             <td>${{ number_format($reg->event->event_fee / 100, 2) }}</td>
                             <td>
                                 @php
-                                    $statusColors = ['PENDING' => '#b45309', 'CONFIRMED' => '#2c6e1e', 'CANCELLED' => '#991b1b'];
-                                    $statusBg = ['PENDING' => '#fef3c7', 'CONFIRMED' => '#e9f5e3', 'CANCELLED' => '#fee2e2'];
+                                    $statusColors = ['PENDING' => '#b45309', 'COMPLETED' => '#2c6e1e', 'CANCELLED' => '#991b1b'];
+                                    $statusBg = ['PENDING' => '#fef3c7', 'COMPLETED' => '#e9f5e3', 'CANCELLED' => '#fee2e2'];
                                     $color = $statusColors[$reg->payment_status] ?? '#374151';
                                     $bg = $statusBg[$reg->payment_status] ?? '#f3f4f6';
                                 @endphp

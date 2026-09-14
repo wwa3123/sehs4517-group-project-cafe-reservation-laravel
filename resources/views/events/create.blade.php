@@ -33,8 +33,9 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                     <div>
-                        <label for="event_fee" class="mb-1.5 block text-sm font-medium text-gray-700">Event Fee</label>
+                        <label for="event_fee" class="mb-1.5 block text-sm font-medium text-gray-700">Event Fee (cents)</label>
                         <input type="number" name="event_fee" id="event_fee" value="{{ old('event_fee', 0) }}" min="0" required class="block w-full rounded-lg border border-gray-300 px-3 py-2.5 text-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        <p class="mt-1 text-xs text-gray-500">Enter cents (e.g. 1000 = $10.00).</p>
                     </div>
 
                     <div>

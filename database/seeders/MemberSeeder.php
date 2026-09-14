@@ -6,6 +6,7 @@ use App\Models\Member;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class MemberSeeder extends Seeder
 {
@@ -21,7 +22,7 @@ class MemberSeeder extends Seeder
             'last_name' => 'User',
             'address' => '1 Admin Plaza, Springfield',
             'phone' => '555-0100',
-            'password_hash' => Hash::make('admin123'),
+            'password_hash' => Hash::make(Str::random(40)),
             'role' => 'admin',
             'subscribe_events' => false,
             'loyalty_points' => 0,
@@ -32,9 +33,9 @@ class MemberSeeder extends Seeder
             'last_name' => 'Doe',
             'address' => '123 Main St, Springfield',
             'phone' => '555-0101',
-            'password_hash' => Hash::make('password123'),
+            'password_hash' => Hash::make(Str::random(40)),
             'subscribe_events' => true,
-            'loyalty_points' => 150,
+            'loyalty_points' => 0,
         ]);
 
         Member::updateOrCreate(['email' => 'jane.smith@example.com'], [
@@ -42,9 +43,9 @@ class MemberSeeder extends Seeder
             'last_name' => 'Smith',
             'address' => '456 Oak Ave, Springfield',
             'phone' => '555-0102',
-            'password_hash' => Hash::make('password123'),
+            'password_hash' => Hash::make(Str::random(40)),
             'subscribe_events' => true,
-            'loyalty_points' => 300,
+            'loyalty_points' => 0,
         ]);
 
         Member::updateOrCreate(['email' => 'bob.johnson@example.com'], [
@@ -52,9 +53,9 @@ class MemberSeeder extends Seeder
             'last_name' => 'Johnson',
             'address' => '789 Pine Rd, Springfield',
             'phone' => '555-0103',
-            'password_hash' => Hash::make('password123'),
+            'password_hash' => Hash::make(Str::random(40)),
             'subscribe_events' => false,
-            'loyalty_points' => 75,
+            'loyalty_points' => 0,
         ]);
     }
 }

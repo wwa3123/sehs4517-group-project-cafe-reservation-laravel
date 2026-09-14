@@ -1,86 +1,9 @@
 @extends('layouts.app')
 @section('title', 'Register')
 @push('head')
-    @vite('resources/js/validation.js')
+    @vite(['resources/css/forms.css', 'resources/js/validation.js'])
 @endpush
 @section('content')
-    <style>
-        .form-card {
-            background-color: var(--card-bg);
-            border-color: var(--border);
-        }
-
-        .form-label {
-            color: var(--text-secondary);
-        }
-
-        .form-input {
-            background-color: var(--card-bg);
-            color: var(--text-primary);
-            border-color: #d0d5cf;
-            transition: all 0.2s ease;
-        }
-
-        body.app-page.dark .form-input {
-            border-color: var(--border);
-        }
-
-        .form-input:focus {
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--accent-tint);
-            outline: none;
-        }
-
-        .accent-box {
-            background-color: var(--accent-tint);
-        }
-
-        .form-error {
-            color: #ef4444;
-        }
-
-        .btn-primary {
-            background-color: var(--accent);
-            color: white;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background-color: var(--accent-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(76, 159, 47, 0.3);
-        }
-
-        .btn-primary:active {
-            background-color: var(--accent);
-            transform: translateY(0);
-            box-shadow: none;
-        }
-
-        .btn-secondary {
-            background-color: var(--border);
-            color: var(--text-secondary);
-            transition: all 0.2s ease;
-        }
-
-        .btn-secondary:hover {
-            background-color: #cde2d5;
-        }
-
-        body.app-page.dark .btn-secondary:hover {
-            background-color: #334a2f;
-        }
-
-        .text-accent {
-            color: var(--accent);
-        }
-
-        .text-accent:hover {
-            background-color: var(--accent-tint);
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-    </style>
     <div class="max-w-xl w-full rounded-3xl border shadow-xl p-10 mx-auto my-8 transition-all form-card">
         <h1 class="text-4xl font-bold text-transparent bg-clip-text mb-3 text-center -tracking-wide" style="background-image: linear-gradient(135deg, var(--accent, #4c9f2f) 0%, #7ac74f 100%);">Create Account</h1>
         <p class="text-center text-sm mb-7 pb-5 border-b" style="color: var(--text-muted); border-color: var(--border);">Join Chit-Chat Café and start booking tables</p>

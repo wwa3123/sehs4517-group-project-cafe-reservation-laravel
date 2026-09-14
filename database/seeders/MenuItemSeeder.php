@@ -19,6 +19,7 @@ class MenuItemSeeder extends Seeder
             'item_name' => 'Espresso',
             'category' => 'Coffee',
             'description' => 'Rich and bold espresso shot',
+            'price_cents' => 350,
             'is_available' => true,
             'photo_url' => 'images/menu/espresso.jpg',
         ]);
@@ -27,6 +28,7 @@ class MenuItemSeeder extends Seeder
             'item_name' => 'Cappuccino',
             'category' => 'Coffee',
             'description' => 'Smooth cappuccino with creamy foam',
+            'price_cents' => 500,
             'is_available' => true,
             'photo_url' => 'images/menu/cappuccino.jpg',
         ]);
@@ -35,6 +37,7 @@ class MenuItemSeeder extends Seeder
             'item_name' => 'Croissant',
             'category' => 'Pastry',
             'description' => 'Buttery French croissant',
+            'price_cents' => 425,
             'is_available' => true,
             'photo_url' => 'images/menu/croissant.jpg',
         ]);
@@ -43,6 +46,7 @@ class MenuItemSeeder extends Seeder
             'item_name' => 'Chocolate Chip Cookie',
             'category' => 'Dessert',
             'description' => 'Classic homemade chocolate chip cookie',
+            'price_cents' => 300,
             'is_available' => true,
             'photo_url' => 'images/menu/cookie.jpg',
         ]);

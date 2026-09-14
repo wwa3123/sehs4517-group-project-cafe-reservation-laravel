@@ -1,7 +1,4 @@
-let timer;
-
-
-// Email validation: check format client-side, then check availability server-side with debounce to avoid excessive requests
+// Email format validation is client-side only; uniqueness is checked when the form is submitted.
 document.getElementById('email')?.addEventListener('input', function (e) {
     const email = e.target.value;
     const msg = document.getElementById('email-msg');
@@ -11,26 +8,14 @@ document.getElementById('email')?.addEventListener('input', function (e) {
         return;
     }
 
-    let valid = re.test(email);
+    if (!re.test(email)) {
+        msg.innerText = '';
+        msg.className = 'form-error text-sm mb-4';
+        return;
+    }
 
-    clearTimeout(timer);
- 
-    timer = setTimeout(async () => {
-        try {
-            if (valid) {
-                const res = await fetch(`/check-email?email=${encodeURIComponent(email)}`);
-                const data = await res.json();
-                msg.innerText = data.exists ? 'Email already registered.' : 'Email available!';
-                msg.className = data.exists ? 'form-error text-sm mb-0' : 'text-accent text-sm mb-0';
-            } else {
-                msg.innerText = "";
-                msg.className = 'form-error text-sm mb-4';
-            }
-        } catch (err) {
-            console.log(err);
-            msg.innerText = "";
-        }
-    }, 500);
+    msg.innerText = '';
+    msg.className = 'form-error text-sm mb-4';
 });
 
 // Strength bar: 20 points each for length > 8, lowercase alphabet, uppercase alphabet, number, special chars ($@#&!_-)
