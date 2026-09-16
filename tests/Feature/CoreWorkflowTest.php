@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Member;
+use App\Models\Reservation;
 use App\Models\Table;
 use App\Models\TimeSlot;
 use App\Services\EventService;
@@ -109,6 +110,106 @@ class CoreWorkflowTest extends TestCase
 
         $this->actingAs($member)->get(route('events.create'))->assertForbidden();
         $this->actingAs($admin)->get(route('events.create'))->assertOk();
+    }
+
+    public function test_admin_can_check_in_and_complete_a_confirmed_reservation(): void
+    {
+        $admin = Member::factory()->create(['role' => 'admin']);
+        $reservation = $this->createReservation();
+
+        $this->actingAs($admin)
+            ->patch(route('reservations.status.update', $reservation), ['status' => Reservation::STATUS_CHECKED_IN])
+            ->assertRedirect(route('reservations.show', $reservation));
+
+        $this->assertDatabaseHas('reservations', [
+            'reservation_id' => $reservation->reservation_id,
+            'status' => Reservation::STATUS_CHECKED_IN,
+        ]);
+        $this->assertNotNull($reservation->fresh()->checked_in_at);
+
+        $this->actingAs($admin)
+            ->patch(route('reservations.status.update', $reservation), ['status' => Reservation::STATUS_COMPLETED])
+            ->assertRedirect(route('reservations.show', $reservation));
+
+        $this->assertDatabaseHas('reservations', [
+            'reservation_id' => $reservation->reservation_id,
+            'status' => Reservation::STATUS_COMPLETED,
+        ]);
+        $this->assertNotNull($reservation->fresh()->completed_at);
+    }
+
+    public function test_members_cannot_change_reservation_status_and_invalid_transitions_are_rejected(): void
+    {
+        $member = Member::factory()->create(['role' => 'member']);
+        $admin = Member::factory()->create(['role' => 'admin']);
+        $reservation = $this->createReservation($member);
+
+        $this->actingAs($member)
+            ->patch(route('reservations.status.update', $reservation), ['status' => Reservation::STATUS_CHECKED_IN])
+            ->assertForbidden();
+
+        $this->actingAs($admin)
+            ->from(route('reservations.show', $reservation))
+            ->patch(route('reservations.status.update', $reservation), ['status' => Reservation::STATUS_COMPLETED])
+            ->assertRedirect(route('reservations.show', $reservation))
+            ->assertSessionHasErrors('status');
+
+        $this->assertDatabaseHas('reservations', [
+            'reservation_id' => $reservation->reservation_id,
+            'status' => Reservation::STATUS_CONFIRMED,
+        ]);
+    }
+
+    public function test_cancelling_a_reservation_releases_its_slots_for_a_new_booking(): void
+    {
+        $admin = Member::factory()->create(['role' => 'admin']);
+        $member = Member::factory()->create();
+        $table = $this->createTable();
+        $slot = $this->createTimeSlot();
+        $date = Carbon::tomorrow()->toDateString();
+        $service = app(ReservationService::class);
+        $reservation = $service->createReservation([
+            'member_id' => $member->member_id,
+            'date' => $date,
+            'num_guests' => 2,
+            'table_id' => $table->table_id,
+            'time_slots_id' => [$slot->time_slots_id],
+        ]);
+
+        $this->actingAs($admin)
+            ->patch(route('reservations.status.update', $reservation), ['status' => Reservation::STATUS_CANCELLED])
+            ->assertRedirect(route('reservations.show', $reservation));
+
+        $this->assertDatabaseHas('reservations', [
+            'reservation_id' => $reservation->reservation_id,
+            'status' => Reservation::STATUS_CANCELLED,
+        ]);
+        $this->assertDatabaseMissing('reserved_slots', ['reservation_id' => $reservation->reservation_id]);
+
+        $replacement = $service->createReservation([
+            'member_id' => Member::factory()->create()->member_id,
+            'date' => $date,
+            'num_guests' => 2,
+            'table_id' => $table->table_id,
+            'time_slots_id' => [$slot->time_slots_id],
+        ]);
+
+        $this->assertSame(Reservation::STATUS_CONFIRMED, $replacement->status);
+    }
+
+    private function createReservation(?Member $member = null): Reservation
+    {
+        $member ??= Member::factory()->create();
+        $table = $this->createTable();
+        $slot = $this->createTimeSlot();
+
+        return app(ReservationService::class)->createReservation([
+            'member_id' => $member->member_id,
+            'date' => Carbon::tomorrow()->toDateString(),
+            'num_guests' => 2,
+            'table_id' => $table->table_id,
+            'time_slots_id' => [$slot->time_slots_id],
+        ]);
     }
 
     private function createTable(): Table

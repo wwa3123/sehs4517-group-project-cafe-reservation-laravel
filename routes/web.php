@@ -85,6 +85,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/{reservation}', [ReservationController::class, 'show'])->name('show');
         Route::get('/{reservation}/edit', [ReservationController::class, 'edit'])->name('edit')->middleware('admin');
         Route::put('/{reservation}', [ReservationController::class, 'update'])->name('update')->middleware('admin');
+        Route::patch('/{reservation}/status', [ReservationController::class, 'updateStatus'])->name('status.update')->middleware('admin');
         Route::delete('/{reservation}', [ReservationController::class, 'destroy'])->name('destroy')->middleware('admin');
     });
 

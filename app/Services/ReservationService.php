@@ -33,6 +33,7 @@ class ReservationService
                 'member_id' => $memberId,
                 'date' => $data['date'],
                 'num_guests' => $data['num_guests'],
+                'status' => Reservation::STATUS_CONFIRMED,
             ]);
 
             foreach ($data['time_slots_id'] as $timeSlotId) {
@@ -93,11 +94,47 @@ class ReservationService
                 Member::where('member_id', $reservation->member_id)
                     ->increment('loyalty_points', abs($netPoints));
             }
+
         }
 
         $reservation->loyaltyTransactions()->delete();
         $reservation->reservedSlots()->delete();
         $reservation->delete();
+    }
+
+    public function transitionStatus(Reservation $reservation, string $status): Reservation
+    {
+        return DB::transaction(function () use ($reservation, $status) {
+            $reservation = Reservation::lockForUpdate()->findOrFail($reservation->reservation_id);
+
+            $allowedTransitions = [
+                Reservation::STATUS_CONFIRMED => [
+                    Reservation::STATUS_CHECKED_IN => 'checked_in_at',
+                    Reservation::STATUS_CANCELLED => 'cancelled_at',
+                    Reservation::STATUS_NO_SHOW => 'no_show_at',
+                ],
+                Reservation::STATUS_CHECKED_IN => [
+                    Reservation::STATUS_COMPLETED => 'completed_at',
+                ],
+            ];
+
+            $timestampField = $allowedTransitions[$reservation->status][$status] ?? null;
+
+            if ($timestampField === null) {
+                throw new \DomainException('This reservation cannot be changed to the selected status.');
+            }
+
+            $reservation->update([
+                'status' => $status,
+                $timestampField => now(),
+            ]);
+
+            if ($status === Reservation::STATUS_CANCELLED) {
+                $reservation->reservedSlots()->delete();
+            }
+
+            return $reservation;
+        });
     }
 
     /**
