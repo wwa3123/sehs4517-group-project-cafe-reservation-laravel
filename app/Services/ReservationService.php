@@ -129,7 +129,7 @@ class ReservationService
                 $timestampField => now(),
             ]);
 
-            if ($status === Reservation::STATUS_CANCELLED) {
+            if (in_array($status, [Reservation::STATUS_CANCELLED, Reservation::STATUS_NO_SHOW], true)) {
                 $reservation->reservedSlots()->delete();
             }
 

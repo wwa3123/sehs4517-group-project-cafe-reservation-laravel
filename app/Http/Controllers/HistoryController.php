@@ -16,12 +16,23 @@ class HistoryController extends Controller
         $upcoming = Reservation::with('reservedSlots.table', 'reservedSlots.timeSlot')
             ->where('member_id', $memberId)
             ->where('date', '>=', $today)
+            ->whereIn('status', [
+                Reservation::STATUS_CONFIRMED,
+                Reservation::STATUS_CHECKED_IN,
+            ])
             ->orderBy('date')
             ->paginate(10, ['*'], 'upcoming_page');
 
         $past = Reservation::with('reservedSlots.table', 'reservedSlots.timeSlot')
             ->where('member_id', $memberId)
-            ->where('date', '<', $today)
+            ->where(function ($query) use ($today) {
+                $query->where('date', '<', $today)
+                    ->orWhereIn('status', [
+                        Reservation::STATUS_COMPLETED,
+                        Reservation::STATUS_CANCELLED,
+                        Reservation::STATUS_NO_SHOW,
+                    ]);
+            })
             ->orderByDesc('date')
             ->paginate(10, ['*'], 'past_page');
 

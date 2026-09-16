@@ -10,10 +10,8 @@
 </head>
 <body class="app-page min-h-screen @yield('bodyClass')">
 
-    {{-- Dark mode toggle --}}
-    <button class="theme-toggle" id="themeToggleBtn" aria-label="Toggle theme">🌞</button>
+    <button class="theme-toggle" id="themeToggleBtn" aria-label="Switch to dark theme">Light</button>
 
-    {{-- Navigation --}}
     <nav class="app-nav">
         <div class="app-nav-inner">
             <a href="{{ route('home') }}" class="app-brand">Chit-Chat Café</a>
@@ -31,6 +29,10 @@
                     Events
                 </a>
                 @auth
+                <a href="{{ route('reservation.history') }}"
+                   class="app-nav-link {{ request()->routeIs('reservation.history') ? 'active' : '' }}">
+                    My Visits
+                </a>
                 <a href="{{ route('profile') }}"
                    class="app-nav-link {{ request()->routeIs('profile') ? 'active' : '' }}">
                     Profile
@@ -39,17 +41,18 @@
                     @csrf
                     <button type="submit" class="app-nav-link app-nav-logout">Logout</button>
                 </form>
+                @else
+                <a href="{{ route('login') }}" class="app-nav-link {{ request()->routeIs('login*') ? 'active' : '' }}">Sign in</a>
+                <a href="{{ route('register') }}" class="app-nav-link app-nav-cta {{ request()->routeIs('register*') ? 'active' : '' }}">Create account</a>
                 @endauth
             </div>
         </div>
     </nav>
 
-    {{-- Main content area --}}
     <div class="app-content">
         @yield('content')
     </div>
 
-    {{-- Dark mode init script --}}
     <script>
     (function () {
         var btn  = document.getElementById('themeToggleBtn');
@@ -57,18 +60,21 @@
         var stored = localStorage.getItem('theme') || 'light';
         if (stored === 'dark') {
             body.classList.add('dark');
-            btn.innerHTML = '🌙';
+            btn.innerHTML = 'Dark';
+            btn.setAttribute('aria-label', 'Switch to light theme');
         } else {
-            btn.innerHTML = '🌞';
+            btn.innerHTML = 'Light';
         }
         btn.addEventListener('click', function () {
             if (body.classList.contains('dark')) {
                 body.classList.remove('dark');
-                btn.innerHTML = '🌞';
+                btn.innerHTML = 'Light';
+                btn.setAttribute('aria-label', 'Switch to dark theme');
                 localStorage.setItem('theme', 'light');
             } else {
                 body.classList.add('dark');
-                btn.innerHTML = '🌙';
+                btn.innerHTML = 'Dark';
+                btn.setAttribute('aria-label', 'Switch to light theme');
                 localStorage.setItem('theme', 'dark');
             }
         });

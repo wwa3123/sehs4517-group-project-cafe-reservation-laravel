@@ -52,7 +52,7 @@
                 </div>
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Visit Status</dt>
-                    <dd class="mt-1 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $reservation->status)) }}</dd>
+                    <dd class="mt-1"><x-reservation-status-badge :status="$reservation->status" /></dd>
                 </div>
                 @if($reservation->checked_in_at)
                     <div>

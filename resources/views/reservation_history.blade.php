@@ -121,7 +121,7 @@
             @if($upcoming->count() > 0)
                 <table>
                     <thead>
-                        <tr><th>#</th><th>Date</th><th>Table</th><th>Time Slot(s)</th><th>Guests</th><th></th></tr>
+                        <tr><th>#</th><th>Date</th><th>Table</th><th>Time Slot(s)</th><th>Guests</th><th>Status</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach($upcoming as $item)
@@ -135,6 +135,7 @@
                                 @endforeach
                             </td>
                             <td>{{ $item->num_guests }}</td>
+                            <td><x-reservation-status-badge :status="$item->status" /></td>
                             <td><a href="{{ route('reservations.show', $item->reservation_id) }}" style="color:var(--accent,#4c9f2f);font-weight:600;white-space:nowrap;">View →</a></td>
                         </tr>
                         @endforeach
@@ -157,7 +158,7 @@
             @if($past->count() > 0)
                 <table>
                     <thead>
-                        <tr><th>#</th><th>Date</th><th>Table</th><th>Time Slot(s)</th><th>Guests</th><th></th></tr>
+                        <tr><th>#</th><th>Date</th><th>Table</th><th>Time Slot(s)</th><th>Guests</th><th>Status</th><th></th></tr>
                     </thead>
                     <tbody>
                         @foreach($past as $item)
@@ -171,6 +172,7 @@
                                 @endforeach
                             </td>
                             <td>{{ $item->num_guests }}</td>
+                            <td><x-reservation-status-badge :status="$item->status" /></td>
                             <td><a href="{{ route('reservations.show', $item->reservation_id) }}" style="color:var(--accent,#4c9f2f);font-weight:600;white-space:nowrap;">View →</a></td>
                         </tr>
                         @endforeach
