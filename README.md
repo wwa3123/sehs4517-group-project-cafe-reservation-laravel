@@ -89,8 +89,8 @@ php artisan route:cache
 php artisan view:cache
 ```
 
-## Portfolio walkthrough
+<!-- ## Portfolio walkthrough
 
 For a concise demo, create a reservation as a customer, sign in as the administrator, check the party in, then complete the visit. Alternatively, cancel a confirmed booking to show that the slot becomes available again. The reservation list, detail page, and customer history show the lifecycle state throughout the workflow.
 
-Add screenshots or a short screen recording of that flow here when the project is deployed or presented.
+Add screenshots or a short screen recording of that flow here when the project is deployed or presented. -->
