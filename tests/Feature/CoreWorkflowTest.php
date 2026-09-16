@@ -197,6 +197,36 @@ class CoreWorkflowTest extends TestCase
         $this->assertSame(Reservation::STATUS_CONFIRMED, $replacement->status);
     }
 
+    public function test_cancelled_future_reservations_are_shown_in_member_visit_history(): void
+    {
+        $member = Member::factory()->create();
+        $reservation = $this->createReservation($member);
+
+        app(ReservationService::class)->transitionStatus($reservation, Reservation::STATUS_CANCELLED);
+
+        $this->actingAs($member)
+            ->get(route('reservation.history'))
+            ->assertOk()
+            ->assertSee('Past')
+            ->assertSee('Cancelled');
+    }
+
+    public function test_no_show_reservations_release_their_table_slots(): void
+    {
+        $admin = Member::factory()->create(['role' => 'admin']);
+        $reservation = $this->createReservation();
+
+        $this->actingAs($admin)
+            ->patch(route('reservations.status.update', $reservation), ['status' => Reservation::STATUS_NO_SHOW])
+            ->assertRedirect(route('reservations.show', $reservation));
+
+        $this->assertDatabaseHas('reservations', [
+            'reservation_id' => $reservation->reservation_id,
+            'status' => Reservation::STATUS_NO_SHOW,
+        ]);
+        $this->assertDatabaseMissing('reserved_slots', ['reservation_id' => $reservation->reservation_id]);
+    }
+
     private function createReservation(?Member $member = null): Reservation
     {
         $member ??= Member::factory()->create();

@@ -115,6 +115,71 @@ body.app-page.dark {
     background-color: var(--accent-tint);
     color: var(--accent);
 }
+.app-nav-cta {
+    background-color: var(--accent);
+    color: #fff;
+}
+.app-nav-cta:hover {
+    background-color: var(--accent-dark);
+    color: #fff;
+}
+
+.reservation-status {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+.reservation-status--confirmed { background: #e0e7ff; color: #3730a3; }
+.reservation-status--checked_in { background: #dbeafe; color: #1d4ed8; }
+.reservation-status--completed { background: #dcfce7; color: #166534; }
+.reservation-status--cancelled { background: #fee2e2; color: #b91c1c; }
+.reservation-status--no_show { background: #fef3c7; color: #92400e; }
+
+.portfolio-empty-state {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+.portfolio-empty-state strong {
+    display: block;
+    color: var(--text-primary);
+    font-size: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 700px) {
+    .app-page .theme-toggle {
+        position: absolute;
+        top: 0.65rem;
+        right: 0.75rem;
+        width: auto;
+        height: 2rem;
+        padding: 0 0.6rem;
+        border-radius: 0.5rem;
+        font-size: 0.75rem;
+    }
+    .app-nav-inner {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.25rem;
+        height: auto;
+        min-height: 3.75rem;
+        padding: 0.7rem 3.75rem 0.6rem 1rem;
+    }
+    .app-nav-links {
+        flex-wrap: wrap;
+        gap: 0.15rem;
+        padding-right: 0;
+    }
+    .app-nav-link {
+        padding: 0.3rem 0.45rem;
+    }
+}
 
 /* ---- Page content wrapper ---- */
 .app-content {
@@ -181,6 +246,11 @@ body.app-page.dark .bg-red-50       { background-color: #2a1a1a !important; }
 body.app-page.dark .border-red-200  { border-color: #4a2020    !important; }
 body.app-page.dark .text-red-700,
 body.app-page.dark .text-red-500    { color: #f87171            !important; }
+body.app-page.dark .reservation-status--confirmed { background: #312e81; color: #e0e7ff; }
+body.app-page.dark .reservation-status--checked_in { background: #1e3a8a; color: #dbeafe; }
+body.app-page.dark .reservation-status--completed { background: #14532d; color: #dcfce7; }
+body.app-page.dark .reservation-status--cancelled { background: #7f1d1d; color: #fee2e2; }
+body.app-page.dark .reservation-status--no_show { background: #78350f; color: #fef3c7; }
 
 /* Form elements */
 body.app-page.dark input:not([type=checkbox]):not([type=radio]),

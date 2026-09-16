@@ -18,7 +18,7 @@
     },
     "name": "boardgame-cafe-reservation",
     "version": "1.0.0",
-    "description": "<p align=\"center\"><a href=\"https://laravel.com\" target=\"_blank\"><img src=\"https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg\" width=\"400\" alt=\"Laravel Logo\"></a></p>",
+    "description": "A Laravel reservation platform for a fictional board-game cafe.",
     "main": "vite.config.js",
     "directories": {
         "test": "tests"
@@ -27,8 +27,8 @@
         "type": "git",
         "url": "git+https://github.com/wwa3123/sehs4517-group-project-cafe-reservation-laravel.git"
     },
-    "keywords": [],
-    "author": "",
+    "keywords": ["laravel", "board-game-cafe", "reservation-system", "portfolio"],
+    "author": "Chit-Chat Cafe project team",
     "license": "ISC",
     "bugs": {
         "url": "https://github.com/wwa3123/sehs4517-group-project-cafe-reservation-laravel/issues"

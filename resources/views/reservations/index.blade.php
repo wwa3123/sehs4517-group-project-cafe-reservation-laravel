@@ -60,9 +60,7 @@
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('M j, Y') }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->num_guests }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
-                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
-                                        {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
-                                    </span>
+                                    <x-reservation-status-badge :status="$reservation->status" />
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     @foreach($reservation->reservedSlots->pluck('table.name')->unique() as $tableName)

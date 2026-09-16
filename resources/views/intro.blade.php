@@ -1,156 +1,70 @@
 @extends('layouts.app')
-@section('title', 'Home')
+@section('title', 'Chit-Chat Cafe | Board games, good food, great company')
 @push('head')
 <style>
-    .intro-wrapper {
-        max-width: 820px;
-        width: 100%;
-        margin: 0 auto;
-        padding: 48px 24px 64px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 36px;
-    }
-
-    .intro-logo {
-        width: 140px;
-        height: 140px;
-        object-fit: contain;
-        border-radius: 50%;
-        border: 3px solid var(--border, #ddebe0);
-        box-shadow: 0 8px 24px rgba(76, 159, 47, 0.15);
-    }
-
-    .intro-brand {
-        text-align: center;
-    }
-
-    .intro-brand h1 {
-        font-size: 2.8rem;
-        font-weight: 800;
-        letter-spacing: -0.5px;
-        background: linear-gradient(135deg, var(--accent, #4c9f2f) 0%, #7ac74f 100%);
-        background-clip: text;
-        -webkit-background-clip: text;
-        color: transparent;
-        line-height: 1.2;
-    }
-
-    .intro-tagline {
-        font-size: 1.1rem;
-        color: var(--text-muted, #6b7c68);
-        font-style: italic;
-        margin-top: 6px;
-    }
-
-    .intro-card {
-        width: 100%;
-        background-color: var(--card-bg, #ffffff);
-        border-radius: 32px;
-        border: 1px solid var(--border, #ddebe0);
-        padding: 36px 40px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.04);
-        animation: introFadeUp 0.5s ease-out;
-    }
-
-    .intro-card h3 {
-        font-size: 1rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color: var(--accent, #4c9f2f);
-        margin-bottom: 16px;
-    }
-
-    .intro-card p {
-        color: var(--text-secondary, #3a5a34);
-        font-size: 0.975rem;
-        line-height: 1.75;
-        margin-bottom: 6px;
-    }
-
-    .intro-cta {
-        display: flex;
-        gap: 14px;
-        flex-wrap: wrap;
-        justify-content: center;
-    }
-
-    .intro-cta a {
-        padding: 13px 30px;
-        border-radius: 40px;
-        font-size: 0.95rem;
-        font-weight: 700;
-        text-decoration: none;
-        transition: all 0.25s ease;
-    }
-
-    .btn-primary {
-        background-color: var(--accent, #4c9f2f);
-        color: #ffffff;
-    }
-
-    .btn-primary:hover {
-        background-color: var(--accent-dark, #3b7e24);
-        transform: translateY(-2px);
-        box-shadow: 0 8px 18px rgba(76, 159, 47, 0.3);
-    }
-
-    .btn-outline {
-        background-color: transparent;
-        color: var(--accent, #4c9f2f);
-        border: 2px solid var(--accent, #4c9f2f);
-    }
-
-    .btn-outline:hover {
-        background-color: var(--accent-tint, #e9f5e3);
-        transform: translateY(-2px);
-    }
-
-    @keyframes introFadeUp {
-        from { opacity: 0; transform: translateY(16px); }
-        to   { opacity: 1; transform: translateY(0); }
-    }
-
-    @media (max-width: 600px) {
-        .intro-brand h1 { font-size: 2rem; }
-        .intro-card { padding: 28px 24px; }
-    }
+    .home-shell { max-width: 1100px; margin: 0 auto; padding: 4rem 1.5rem 5rem; }
+    .home-hero { display: grid; grid-template-columns: 1.25fr .75fr; align-items: center; gap: 3rem; }
+    .home-eyebrow { color: var(--accent); font-size: .8rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; }
+    .home-title { color: var(--text-primary); font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 800; letter-spacing: -.05em; line-height: 1; margin: .75rem 0 1.25rem; }
+    .home-copy { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.7; max-width: 38rem; }
+    .home-actions { display: flex; flex-wrap: wrap; gap: .75rem; margin-top: 2rem; }
+    .home-action { border-radius: .75rem; font-weight: 700; padding: .85rem 1.1rem; text-decoration: none; transition: var(--transition); }
+    .home-action-primary { background: var(--accent); color: #fff; }
+    .home-action-primary:hover { background: var(--accent-dark); transform: translateY(-2px); }
+    .home-action-secondary { border: 1px solid var(--border); color: var(--text-primary); }
+    .home-action-secondary:hover { background: var(--accent-tint); border-color: var(--accent); }
+    .home-mark { aspect-ratio: 1; background: var(--card-bg); border: 1px solid var(--border); border-radius: 2rem; box-shadow: var(--shadow); display: grid; place-items: center; padding: 2rem; }
+    .home-mark-symbol { color: var(--accent); font-size: clamp(5rem, 15vw, 9rem); font-weight: 800; line-height: 1; }
+    .home-mark-label { color: var(--text-muted); font-size: .8rem; font-weight: 700; letter-spacing: .12em; margin-top: 1rem; text-transform: uppercase; }
+    .home-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 4rem; }
+    .home-feature { background: var(--card-bg); border: 1px solid var(--border); border-radius: 1rem; padding: 1.5rem; }
+    .home-feature h2 { color: var(--text-primary); font-size: 1.05rem; font-weight: 700; margin: .75rem 0 .4rem; }
+    .home-feature p { color: var(--text-muted); font-size: .9rem; line-height: 1.6; }
+    .home-feature-icon { color: var(--accent); font-size: 1.5rem; font-weight: 800; }
+    @media (max-width: 700px) { .home-shell { padding-top: 2.5rem; } .home-hero { grid-template-columns: 1fr; gap: 2rem; } .home-mark { max-width: 18rem; } .home-features { grid-template-columns: 1fr; margin-top: 2.5rem; } }
 </style>
 @endpush
 @section('content')
-<div class="intro-wrapper">
+<main class="home-shell">
+    <section class="home-hero" aria-labelledby="home-title">
+        <div>
+            <p class="home-eyebrow">Your local board-game cafe</p>
+            <h1 id="home-title" class="home-title">Make time for play.</h1>
+            <p class="home-copy">Chit-Chat Cafe is a welcoming fictional board-game cafe where groups can reserve a table, choose a game, share drinks and bites, and join community events.</p>
+            <div class="home-actions">
+                @auth
+                    <a class="home-action home-action-primary" href="{{ route('reservations.create') }}">Reserve a table</a>
+                @else
+                    <a class="home-action home-action-primary" href="{{ route('register') }}">Create an account</a>
+                @endauth
+                <a class="home-action home-action-secondary" href="{{ route('events.index') }}">Browse events</a>
+                <a class="home-action home-action-secondary" href="{{ route('menu') }}">View menu</a>
+            </div>
+        </div>
+        <div class="home-mark">
+            <div class="text-center">
+                <div class="home-mark-symbol" aria-hidden="true">CC</div>
+                <div class="home-mark-label">Chit-Chat Cafe</div>
+            </div>
+        </div>
+    </section>
 
-    {{-- Brand header --}}
-    <div class="intro-brand">
-        <img src="/cafe_logo.png" alt="Chit Chat Cafe Logo" class="intro-logo" onerror="this.style.display='none'">
-        <h1>Chit Chat Cafe</h1>
-        <p class="intro-tagline">Cozy Chit | Easy Chat</p>
-    </div>
-
-    {{-- Who we are --}}
-    <div class="intro-card">
-        <h3>Who we are</h3>
-        <p>Welcome to Chit Chat Cafe, you can enjoy over 100 board &amp; card games in here.</p>
-        <p>This cafe has 3 types of table: Standard, Gaming and VIP, providing all customers the most comfort, most motivating, and the most premium game experiences.</p>
-        <p>In late July, we will have the "Strategy Game Tournament" — a competition for a maximum of 16 participants featuring strategic board games. A <strong>CHAMPION CUP</strong> will be awarded to the winner.</p>
-        <p>Also, we have "Family Game Night" every Saturday. Come with your family and <strong>WIN the BIG PRIZE</strong>.</p>
-        <p>Hope you have a wonderful and cozy game experience at Chit Chat Cafe.</p>
-    </div>
-
-    {{-- Did you know --}}
-    <div class="intro-card">
-        <h3>Did you know?</h3>
-        <p>This cafe has been in business for over a hundred years. Back in 1922, the original owner Victoria Shek opened this cafe and created the game Catan, inviting everyone to play when they visited.</p>
-        <p>This is the first boardgame cafe in the world. And here is a little secret — during World War II (1942–1945), this cafe once served as the headquarters of the Anti-Japanese Guerrillas, hailed as the <strong>"Sanctuary for the Allies"</strong>.</p>
-    </div>
-
-    {{-- Call to action --}}
-    <div class="intro-cta">
-        <a href="{{ route('reservations.index') }}" class="btn-primary">Make a Reservation</a>
-        <a href="{{ route('events.index') }}" class="btn-outline">View Events</a>
-    </div>
-
-</div>
+    <section class="home-features" aria-label="Cafe services">
+        <article class="home-feature">
+            <div class="home-feature-icon" aria-hidden="true">01</div>
+            <h2>Reserve with confidence</h2>
+            <p>Availability is protected by table, date, and time slot so groups avoid double bookings.</p>
+        </article>
+        <article class="home-feature">
+            <div class="home-feature-icon" aria-hidden="true">02</div>
+            <h2>Discover your next game</h2>
+            <p>Choose a table that fits your group, then pair your session with food, drinks, and a game recommendation.</p>
+        </article>
+        <article class="home-feature">
+            <div class="home-feature-icon" aria-hidden="true">03</div>
+            <h2>Join the community</h2>
+            <p>Explore hosted game nights and tournaments with capacity-aware event registration.</p>
+        </article>
+    </section>
+</main>
 @endsection
