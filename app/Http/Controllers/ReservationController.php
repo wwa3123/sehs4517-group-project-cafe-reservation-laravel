@@ -15,18 +15,21 @@ class ReservationController extends Controller
 {
     public function __construct(protected ReservationService $reservationService) {}
 
-    public function index()
+    public function index(Request $request)
     {
         $user = auth()->user();
         $query = Reservation::with('member', 'reservedSlots.table', 'reservedSlots.timeSlot', 'loyaltyTransactions');
 
         if ($user->role !== 'admin') {
             $query->where('member_id', $user->member_id);
+        } elseif ($request->filled('status')) {
+            $request->validate(['status' => ['string', 'in:'.implode(',', Reservation::statuses())]]);
+            $query->where('status', $request->input('status'));
         }
 
-        $reservations = $query->paginate(15);
+        $reservations = $query->paginate(15)->withQueryString();
 
-        return view('reservations.index', compact('reservations'));
+        return view('reservations.index', compact('reservations') + ['statuses' => Reservation::statuses()]);
     }
 
     public function create(Request $request)
@@ -88,5 +91,20 @@ class ReservationController extends Controller
         $this->reservationService->deleteReservation($reservation);
 
         return redirect()->route('reservations.index')->with('success', 'Reservation deleted successfully.');
+    }
+
+    public function updateStatus(Request $request, Reservation $reservation)
+    {
+        $request->validate([
+            'status' => ['required', 'string', 'in:'.implode(',', Reservation::statuses())],
+        ]);
+
+        try {
+            $this->reservationService->transitionStatus($reservation, $request->string('status')->toString());
+        } catch (\DomainException $exception) {
+            return back()->withErrors(['status' => $exception->getMessage()]);
+        }
+
+        return redirect()->route('reservations.show', $reservation)->with('success', 'Reservation status updated successfully.');
     }
 }

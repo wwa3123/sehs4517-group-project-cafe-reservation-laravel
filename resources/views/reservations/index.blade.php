@@ -17,6 +17,23 @@
         @endif
 
         <div class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+            @if(auth()->user()?->role === 'admin')
+                <form method="GET" action="{{ route('reservations.index') }}" class="flex items-end gap-3 border-b border-gray-200 bg-gray-50 p-4">
+                    <div>
+                        <label for="status" class="block text-xs font-semibold uppercase tracking-wider text-gray-600">Visit Status</label>
+                        <select id="status" name="status" class="mt-1 rounded-lg border-gray-300 text-sm">
+                            <option value="">All statuses</option>
+                            @foreach($statuses as $status)
+                                <option value="{{ $status }}" @selected(request('status') === $status)>{{ ucfirst(str_replace('_', ' ', $status)) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <button type="submit" class="inline-flex items-center rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-700">Filter</button>
+                    @if(request()->filled('status'))
+                        <a href="{{ route('reservations.index') }}" class="inline-flex items-center px-2 py-2 text-sm font-medium text-gray-600 hover:text-gray-900">Clear</a>
+                    @endif
+                </form>
+            @endif
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-100">
@@ -25,6 +42,7 @@
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Member</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Date</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Guests</th>
+                            <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Status</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Table</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Time Slot</th>
                             <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-600">Loyalty</th>
@@ -41,6 +59,11 @@
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->date->format('M j, Y') }}</td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $reservation->num_guests }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">
+                                    <span class="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-1 text-xs font-medium text-gray-700">
+                                        {{ ucfirst(str_replace('_', ' ', $reservation->status)) }}
+                                    </span>
+                                </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">
                                     @foreach($reservation->reservedSlots->pluck('table.name')->unique() as $tableName)
                                         <div>{{ $tableName }}</div>
@@ -89,7 +112,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
+                                <td colspan="10" class="px-4 py-8 text-center text-sm text-gray-500">No reservations found.</td>
                             </tr>
                         @endforelse
                     </tbody>

@@ -22,6 +22,13 @@
         </div>
 
         <div class="rounded-xl border border-gray-200 bg-white shadow-sm p-6 sm:p-8 space-y-6">
+            @if(session('success'))
+                <div class="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ session('success') }}</div>
+            @endif
+            @error('status')
+                <div class="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{{ $message }}</div>
+            @enderror
+
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Member</dt>
@@ -43,6 +50,34 @@
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Number of Guests</dt>
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->num_guests }}</dd>
                 </div>
+                <div>
+                    <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Visit Status</dt>
+                    <dd class="mt-1 text-sm text-gray-700">{{ ucfirst(str_replace('_', ' ', $reservation->status)) }}</dd>
+                </div>
+                @if($reservation->checked_in_at)
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Checked In At</dt>
+                        <dd class="mt-1 text-sm text-gray-700">{{ $reservation->checked_in_at->format('F j, Y g:i A') }}</dd>
+                    </div>
+                @endif
+                @if($reservation->completed_at)
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Completed At</dt>
+                        <dd class="mt-1 text-sm text-gray-700">{{ $reservation->completed_at->format('F j, Y g:i A') }}</dd>
+                    </div>
+                @endif
+                @if($reservation->cancelled_at)
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Cancelled At</dt>
+                        <dd class="mt-1 text-sm text-gray-700">{{ $reservation->cancelled_at->format('F j, Y g:i A') }}</dd>
+                    </div>
+                @endif
+                @if($reservation->no_show_at)
+                    <div>
+                        <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Marked No-Show At</dt>
+                        <dd class="mt-1 text-sm text-gray-700">{{ $reservation->no_show_at->format('F j, Y g:i A') }}</dd>
+                    </div>
+                @endif
                 <div>
                     <dt class="text-xs font-semibold uppercase tracking-wider text-gray-500">Loyalty Tokens Earned</dt>
                     <dd class="mt-1 text-sm text-gray-700">{{ (int) optional($reservation->loyaltyTransactions->first())->points }} tokens</dd>
@@ -68,6 +103,35 @@
                     <dd class="mt-1 text-sm text-gray-700">{{ $reservation->reservedSlots->first()?->table?->name ?? 'N/A' }}</dd>
                 </div>
             </dl>
+
+            @if(auth()->user()?->role === 'admin')
+                @php
+                    $availableActions = match ($reservation->status) {
+                        \App\Models\Reservation::STATUS_CONFIRMED => [
+                            'checked_in' => 'Check In',
+                            'cancelled' => 'Cancel Reservation',
+                            'no_show' => 'Mark No-Show',
+                        ],
+                        \App\Models\Reservation::STATUS_CHECKED_IN => ['completed' => 'Complete Visit'],
+                        default => [],
+                    };
+                @endphp
+                @if($availableActions)
+                    <section class="border-t border-gray-200 pt-6">
+                        <h2 class="text-lg font-semibold text-gray-900">Staff Actions</h2>
+                        <div class="mt-3 flex flex-wrap gap-2">
+                            @foreach($availableActions as $status => $label)
+                                <form action="{{ route('reservations.status.update', $reservation) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="status" value="{{ $status }}">
+                                    <button type="submit" class="inline-flex items-center rounded-lg border border-indigo-300 px-3 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-50">{{ $label }}</button>
+                                </form>
+                            @endforeach
+                        </div>
+                    </section>
+                @endif
+            @endif
 
             <section>
                 <h2 class="text-lg font-semibold text-gray-900 mb-3">Reserved Time Slots</h2>
